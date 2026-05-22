@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/NewFolder1/" />
+  <Project Path="WpfApp1/WpfApp1.csproj" />
+  <Project Path="WpfControlLibrary1/WpfControlLibrary1.csproj" />
+</Solution>
