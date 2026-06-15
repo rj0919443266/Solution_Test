@@ -9,7 +9,7 @@ using WpfControlLibrary1.Services;
 
 namespace WpfControlLibrary1.ViewModels
 {
-    public partial class UserControl1ViewModel : ObservableObject
+    public partial class UserControl1ViewModel : ObservableObject, IDisposable
     {
         [ObservableProperty]
         private string _machineStatus = "機台待命準備中";
@@ -28,7 +28,7 @@ namespace WpfControlLibrary1.ViewModels
             //        // 如果是操作 ObservableCollection.Add()，絕對必須包在這裡面！
             //    });
             //});
-            
+
             WeakReferenceMessenger.Default.Register<UserControl1ViewModel, BarcodeScannedMessage>(this, (r, message) =>
             {
                 // 1. 改用 InvokeAsync 避免死鎖
@@ -40,5 +40,14 @@ namespace WpfControlLibrary1.ViewModels
                 });
             });
         }
+
+            // 2. 實作 Dispose 方法，解除所有訂閱！
+        public void Dispose()
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+        }
     }
+
+
+    
 }

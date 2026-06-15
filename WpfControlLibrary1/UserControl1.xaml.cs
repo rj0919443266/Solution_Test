@@ -19,6 +19,16 @@ namespace WpfControlLibrary1
         public UserControl1()
         {
             InitializeComponent();
+            this.Unloaded += UserControl1_Unloaded;
+        }
+
+        private void UserControl1_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Dispose the view model when the control is unloaded
+            if (DataContext is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
     }
 

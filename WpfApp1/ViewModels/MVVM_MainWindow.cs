@@ -383,7 +383,7 @@ namespace WpfApp1.ViewModels
         private readonly List<NavigationItem> _allSystemMenus = new()
         {
             // 首頁與總覽
-           // new NavigationItem { Title = "Home", Icon = PackIconKind.Home, RequiredLevel = 0, TargetViewModelType = typeof(UserControl1ViewModel) },
+            new NavigationItem { Title = "Home", Icon = PackIconKind.Home, RequiredLevel = 0, TargetViewModelType = typeof(UserControl1ViewModel) },
             new NavigationItem {Title = "工單 資訊輸入",Icon = PackIconKind.FileDocumentEditOutline,TargetViewModelType = typeof(VM_WorkPageDataEdit)},
             new NavigationItem { Title = "IPI ", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
             new NavigationItem { Title = "FIR", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },

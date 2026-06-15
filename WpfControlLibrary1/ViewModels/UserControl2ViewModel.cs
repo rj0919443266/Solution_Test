@@ -9,7 +9,7 @@ using WpfControlLibrary1.Services;
 
 namespace WpfControlLibrary1.ViewModels
 {
-    public partial class UserControl2ViewModel : ObservableObject
+    public partial class UserControl2ViewModel : ObservableObject, IDisposable
     {
         [ObservableProperty]
         private string _machineStatus = "機台待命準備中";
@@ -29,6 +29,12 @@ namespace WpfControlLibrary1.ViewModels
                     r.MachineStatus = "讀取成功，處理中...";
                 });
             });
+        }
+
+        // 2. 實作 Dispose 方法，解除所有訂閱！
+        public void Dispose()
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
     }
