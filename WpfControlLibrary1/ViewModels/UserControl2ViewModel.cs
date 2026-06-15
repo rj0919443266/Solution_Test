@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WpfControlLibrary1.Services;
 
 namespace WpfControlLibrary1.ViewModels
 {
@@ -19,19 +20,13 @@ namespace WpfControlLibrary1.ViewModels
         public UserControl2ViewModel()
         {
 
-            //StrongReferenceMessenger.Default.Send(new BarcodeScannedMessage("690123456789"));
-            //StrongReferenceMessenger.Default.UnregisterAll(this) 來釋放記憶體
-            //string 實際掃到的條碼 = "690123456789";
-            //WeakReferenceMessenger.Default.Send(new BarcodeScannedMessage(實際掃到的條碼));
-
-            WeakReferenceMessenger.Default.Register<BarcodeScannedMessage>(this, (recipient, message) =>
+            WeakReferenceMessenger.Default.Register<UserControl2ViewModel, BarcodeScannedMessage>(this, (r, message) =>
             {
-                // 使用 Application.Current.Dispatcher 將動作排入 UI 執行緒
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                // 1. 改用 InvokeAsync 避免死鎖
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    LastScannedBarcode = message.Barcode;
-                    MachineStatus = "讀取成功，處理中...";
-                    // 如果是操作 ObservableCollection.Add()，絕對必須包在這裡面！
+                    r.LastScannedBarcode = message.Barcode;
+                    r.MachineStatus = "讀取成功，處理中...";
                 });
             });
         }

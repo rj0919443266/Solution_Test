@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Notifications.Wpf;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace WpfControlLibrary1
+namespace WpfControlLibrary1.Services
 {
     /// <summary>
     /// 負責處理條碼槍通訊的服務
@@ -16,6 +17,8 @@ namespace WpfControlLibrary1
     {
         private SerialPort? _serialPort;
         private readonly IMessenger _messenger;
+        private readonly ISnackbarService _snackbarService;
+        private readonly INotificationService _notificationService;
 
         //斷線偵測雷達 (Timer)
         private System.Timers.Timer? _monitorTimer;
@@ -28,9 +31,11 @@ namespace WpfControlLibrary1
 
 
         // 建構子：透過 DI 注入 IMessenger
-        public BarcodeScannerService(IMessenger messenger)
+        public BarcodeScannerService(IMessenger messenger, ISnackbarService snackbarService, INotificationService notificationService)
         {
             _messenger = messenger;
+            _snackbarService = snackbarService;
+            _notificationService = notificationService;
         }
 
         // 啟動連線
@@ -72,6 +77,7 @@ namespace WpfControlLibrary1
         }
 
         // 關閉連線 (在程式關閉時呼叫，釋放硬體資源)
+        // 檔案：BarcodeScannerService.cs
         public void Stop()
         {
             if (_monitorTimer != null)
@@ -82,13 +88,30 @@ namespace WpfControlLibrary1
             }
             if (_serialPort != null)
             {
-                if (_serialPort.IsOpen)
-                {
-                    _serialPort.Close();
-                }
+                // 立刻安全解綁事件，防止在關閉過程中執行緒繼續打架
                 _serialPort.DataReceived -= SerialPort_DataReceived;
-                _serialPort.Dispose();
-                _serialPort = null;
+
+                var portToClose = _serialPort;
+                _serialPort = null; // 斷開引用
+
+                // 將 Close 丟至背景執行緒，不卡死 UI 執行緒，徹底粉碎死鎖條件
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        if (portToClose.IsOpen)
+                        {
+                            portToClose.DiscardInBuffer();
+                            portToClose.DiscardOutBuffer();
+                            portToClose.Close();
+                        }
+                        portToClose.Dispose();
+                    }
+                    catch (Exception)
+                    {
+                        // 吸收硬體中斷時的驅動層異常
+                    }
+                });
             }
         }
 
@@ -140,6 +163,9 @@ namespace WpfControlLibrary1
                 {
                     //透過廣播中心，把掃到的條碼發送給全系統！
                     _messenger.Send(new BarcodeScannedMessage(barcode));
+                    _snackbarService.ShowSnackbar($"已讀取條碼: {barcode}", SnackbarMessageType.Information);
+                    //_notificationService.Show("掃描槍資訊", $"已讀取條碼: {barcode}", NotificationType.Information);
+
                 }
             }
             catch (Exception ex)
@@ -153,4 +179,35 @@ namespace WpfControlLibrary1
     {
         void ReceiveBarcode(string barcode);
     }
+
+    // 用於 條碼機  Messenger 的通訊 Class
+    public class BarcodeScannedMessage
+    {
+        public string Barcode { get; }
+        public BarcodeScannedMessage(string barcode) => Barcode = barcode;
+    }
+
+    // 當ComPort硬體實體斷線時發送的訊息
+    public class DeviceDisconnectedMessage
+    {
+        public string PortName { get; }
+
+        public DeviceDisconnectedMessage(string portName)
+        {
+            PortName = portName;
+        }
+    }
+
+
+    /// <summary>
+    /// 掃描槍連線狀態列舉
+    /// </summary>
+    public enum ScannerConnectionState
+    {
+        NotSet,       // 未設定 / 初始狀態
+        Connected,    // 已成功連線
+        Failed,       // 連線失敗
+        Disconnected  // 異常斷線
+    }
+
 }

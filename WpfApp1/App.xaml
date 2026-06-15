@@ -9,21 +9,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!--<materialDesign:BundledTheme BaseTheme="Dark"
-                                             PrimaryColor="DeepPurple"
-                                             SecondaryColor="Lime" />-->
-                <!--<materialDesign:BundledTheme BaseTheme="Dark"
-                                             ColorAdjustment="{materialDesign:ColorAdjustment}"
-                                             PrimaryColor="DeepPurple"
-                                             SecondaryColor="Lime" />
-
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
-
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Defaults.xaml" />-->
-
+              
 
                 <materialDesign:BundledTheme BaseTheme="Dark"
                                              ColorAdjustment="{materialDesign:ColorAdjustment}"
@@ -36,7 +22,15 @@
 
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Purple.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Defaults.xaml" />
+           
+            
+                
+                
             </ResourceDictionary.MergedDictionaries>
+
+           
         </ResourceDictionary>
+        
+        
     </Application.Resources>
 </Application>

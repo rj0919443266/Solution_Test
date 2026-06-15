@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="WpfControlLibrary1.UserControl_Temp"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WpfControlLibrary1"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                CornerRadius="8"
+                Padding="32"
+                Margin="16">
+
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+
+                <materialDesign:PackIcon Kind="HammerWrench"
+                                         Width="80"
+                                         Height="80"
+                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                         Opacity="0.4"
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,16" />
+
+                <TextBlock Text="模組建置中 ..."
+                           FontSize="24"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.7"
+                           HorizontalAlignment="Center" />
+
+                <TextBlock Text="此功能頁面尚在開發階段，敬請期待。"
+                           FontSize="16"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.5"
+                           Margin="0,12,0,0"
+                           HorizontalAlignment="Center" />
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

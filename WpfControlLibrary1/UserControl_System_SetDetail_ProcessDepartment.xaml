@@ -1,0 +1,156 @@
+﻿<UserControl x:Class="WpfControlLibrary1.UserControl_System_SetDetail_process_department"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="600"
+             d:DesignWidth="900">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+              Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="Domain"
+                                         Width="28"
+                                         Height="28"
+                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                         Margin="0,0,8,0" />
+                <TextBlock Text="部門 (process_department)"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal">
+                <Button Command="{Binding LoadDataCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Height="40"
+                        Margin="0,0,12,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh"
+                                                 Width="18"
+                                                 Height="18"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,6,0" />
+                        <TextBlock Text="刷新快取"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding AddDepartmentCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Height="40">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Plus"
+                                                 Width="18"
+                                                 Height="18"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,6,0" />
+                        <TextBlock Text="新增部門"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Background="{DynamicResource MaterialDesignCardBackground}"
+                CornerRadius="8"
+                Padding="4">
+            <DataGrid ItemsSource="{Binding ObjectList}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      FontSize="16"
+                      SelectionMode="Single"
+                      Style="{StaticResource MaterialDesignDataGrid}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="部門條碼 (BarCode)"
+                                        Binding="{Binding BarCode}"
+                                        Width="Auto" />
+                    <DataGridTextColumn Header="部門名稱 (definition)"
+                                        Binding="{Binding Definition}"
+                                        Width="Auto" />
+                    <DataGridTemplateColumn Header="操作"
+                                            Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Command="{Binding DataContext.EditDepartmentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            ToolTip="修改"
+                                            Width="32"
+                                            Height="32"
+                                            Margin="0,0,8,0">
+                                        <materialDesign:PackIcon Kind="Pencil"
+                                                                 Width="18"
+                                                                 Height="18"
+                                                                 Foreground="{DynamicResource MaterialDesignBody}" />
+                                    </Button>
+                                    <Button Command="{Binding DataContext.DeleteDepartmentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            ToolTip="刪除"
+                                            Width="32"
+                                            Height="32">
+                                        <materialDesign:PackIcon Kind="DeleteForever"
+                                                                 Width="18"
+                                                                 Height="18"
+                                                                 Foreground="#EF5350" />
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Grid Grid.Row="1"
+              Visibility="{Binding HasNoData, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Background="{DynamicResource MaterialDesignPaper}"
+                    CornerRadius="8"
+                    Opacity="0.9" />
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="DatabaseRemoveOutline"
+                                         Width="80"
+                                         Height="80"
+                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                         Opacity="0.4"
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,16" />
+                <TextBlock Text="目前無 部門 資料"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.7"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Background="#80000000"
+                CornerRadius="8"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                         IsIndeterminate="True"
+                         Value="0"
+                         Width="60"
+                         Height="60" />
+        </Border>
+    </Grid>
+</UserControl>

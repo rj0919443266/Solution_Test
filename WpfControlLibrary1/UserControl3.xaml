@@ -13,7 +13,7 @@
                        FontSize="22"
                        FontWeight="Bold"
                        Margin="0,0,0,24"
-                       Foreground="{DynamicResource MaterialDesignPrimaryBrush}" />
+                       Foreground="{DynamicResource MaterialDesignBody}" />
 
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>

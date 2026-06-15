@@ -1,0 +1,233 @@
+﻿<mah:MetroWindow x:Class="WpfControlLibrary1.Window_LotDetail"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                 xmlns:local="clr-namespace:WpfControlLibrary1"
+                 
+                 Title="工單過站明細 (Lot Detail)"
+                 Height="850"
+                 Width="1300"
+                 WindowStartupLocation="CenterScreen"
+                 Background="{DynamicResource MaterialDesignPaper}"
+                 Foreground="{DynamicResource MaterialDesignBody}"
+                 WindowTitleBrush="{DynamicResource MaterialDesignPaper}"
+                 GlowBrush="{DynamicResource MaterialDesignShadowBrush}"
+                 TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                 SaveWindowPosition="True">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 上方：工單基本資訊區塊 -->
+        <Border Grid.Row="0"
+                Background="Transparent"
+                Padding="8,8,16,16">
+            <StackPanel>
+                <TextBlock Text="工單資訊"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.7"
+                           Margin="0,0,0,16" />
+
+                <WrapPanel>
+                    <StackPanel Margin="0,0,48,12">
+                        <TextBlock Text="工單號 (Lot No)"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.4" />
+                        <!--<TextBlock Text="{Binding LotNo}"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Margin="0,2,0,0" />-->
+                        <TextBox Text="{Binding LotNo, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="0"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 Foreground="{DynamicResource MaterialDesignBody}"
+                                 Margin="0,2,0,0"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,48,12">
+                        <TextBlock Text="柱號 (Parent Lot)"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.4" />
+                       
+                        <TextBox Text="{Binding ParentLotNo, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="0"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 Foreground="{DynamicResource MaterialDesignBody}"
+                                 Margin="0,2,0,0"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,48,12">
+                        <TextBlock Text="產品名稱"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.4" />
+                        
+                        <TextBox Text="{Binding ProductName, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="0"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 Foreground="{DynamicResource MaterialDesignBody}"
+                                 Margin="0,2,0,0"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,48,12">
+                        <TextBlock Text="建立者"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.4" />
+                        
+                        <TextBox Text="{Binding Create_user, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="0"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 Foreground="{DynamicResource MaterialDesignBody}"
+                                 Margin="0,2,0,0"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,48,12">
+                        <TextBlock Text="建立時間"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.4" />
+                        <!--<TextBlock Text="{Binding C_time, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Margin="0,2,0,0" />-->
+                        <TextBox Text="{Binding C_time, Mode=OneWay, StringFormat={}{0:yyyy/MM/dd HH:mm:ss}}"
+                                 IsReadOnly="True"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="0"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 Foreground="{DynamicResource MaterialDesignBody}"
+                                 Margin="0,2,0,0"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden" />
+                    </StackPanel>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 下方：左側 Navigation Rail 與 右側 Tab 內容 -->
+        <Grid Grid.Row="1"
+              Background="{DynamicResource MaterialDesignCardBackground}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 側邊導覽列 -->
+            <Grid Grid.Column="0"
+                  Width="100"
+                  Background="{DynamicResource MaterialDesignPaper}">
+                <ListBox x:Name="NavRail"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         SelectedIndex="{Binding SelectedTabIndex}"
+                         Padding="0,16,0,0">
+
+                    <ListBoxItem Style="{StaticResource MaterialDesign3.NavigationRailPrimaryListBoxItem}"
+                                 materialDesign:NavigationRailAssist.IconSize="28"
+                                 materialDesign:NavigationRailAssist.SelectedIcon="FormatListNumbered"
+                                 materialDesign:NavigationRailAssist.UnselectedIcon="FormatListNumbered">
+                        <TextBlock Text="工序歷程"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,4,0,0" />
+                    </ListBoxItem>
+
+                    <ListBoxItem Style="{StaticResource MaterialDesign3.NavigationRailPrimaryListBoxItem}"
+                                 materialDesign:NavigationRailAssist.IconSize="28"
+                                 materialDesign:NavigationRailAssist.SelectedIcon="ClipboardTextSearch"
+                                 materialDesign:NavigationRailAssist.UnselectedIcon="ClipboardTextSearchOutline">
+                        <TextBlock Text="IPI"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,4,0,0" />
+                    </ListBoxItem>
+
+                    <ListBoxItem Style="{StaticResource MaterialDesign3.NavigationRailPrimaryListBoxItem}"
+                                 materialDesign:NavigationRailAssist.IconSize="28"
+                                 materialDesign:NavigationRailAssist.SelectedIcon="ClipboardTextSearch"
+                                 materialDesign:NavigationRailAssist.UnselectedIcon="ClipboardTextSearchOutline">
+                        <TextBlock Text="FIR"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,4,0,0" />
+                    </ListBoxItem>
+
+                    <ListBoxItem Style="{StaticResource MaterialDesign3.NavigationRailPrimaryListBoxItem}"
+                                 materialDesign:NavigationRailAssist.IconSize="28"
+                                 materialDesign:NavigationRailAssist.SelectedIcon="AlertDecagram"
+                                 materialDesign:NavigationRailAssist.UnselectedIcon="AlertDecagramOutline">
+                        <TextBlock Text="異常通知"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Margin="0,4,0,0" />
+                    </ListBoxItem>
+                </ListBox>
+            </Grid>
+
+            <!-- 右側內容切換區 -->
+            <TabControl Grid.Column="1"
+                        SelectedIndex="{Binding SelectedTabIndex}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="16">
+
+                <TabControl.ItemContainerStyle>
+                    <!-- 隱藏原生 Tab 標籤頭，改由左側 ListBox 驅動 -->
+                    <Style TargetType="TabItem">
+                        <Setter Property="Visibility"
+                                Value="Collapsed" />
+                    </Style>
+                </TabControl.ItemContainerStyle>
+
+                <!-- 第一頁：工序歷程 (甘特圖 + 表格) -->
+                <TabItem>
+                    <local:UserControl_LotDetail_WorkData DataContext="{Binding WorkDataVM}" />
+                </TabItem>
+
+                <TabItem>
+                    <local:UserControl_LotDetail_IPI DataContext="{Binding IpiVM}" />
+                </TabItem>
+
+                <TabItem>
+                    <local:UserControl_LotDetail_FIR DataContext="{Binding FirVM}" />
+                </TabItem>
+
+                <TabItem>
+                    <local:UserControl_LotDetail_Quality_Nonconformity_Report DataContext="{Binding QualityNonconformityReportVM}" />
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</mah:MetroWindow>

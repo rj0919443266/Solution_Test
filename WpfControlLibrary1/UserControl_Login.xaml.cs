@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfControlLibrary1.ViewModels;
 
 namespace WpfControlLibrary1
 {
@@ -24,5 +25,14 @@ namespace WpfControlLibrary1
         {
             InitializeComponent();
         }
+        //private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        //{
+        //    // 確認目前的 DataContext 是我們的 LoginViewModel
+        //    if (this.DataContext is VM_Login vm)
+        //    {
+        //        // 將 PasswordBox 裡面的密碼，手動指派給 ViewModel 的屬性
+        //        vm.Password = ((PasswordBox)sender).Password;
+        //    }
+        //}
     }
 }

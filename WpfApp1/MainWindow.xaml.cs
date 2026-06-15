@@ -28,42 +28,57 @@ namespace WpfApp1
 
             // 🌟 將系統傳進來的 viewModel 綁定給 DataContext
             this.DataContext = viewModel;
+
+            
         }
 
+        // 關閉視窗邏輯
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             // 呼叫視窗內建的 Close() 方法來關閉程式
             this.Close();
         }
 
-        /// <summary>
-        /// 處理樹狀選單點擊事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        // 縮小視窗邏輯
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            // 確定點擊到的是 NavItem，而且有設定 TargetViewModelType
-            if (e.NewValue is NavItem selectedItem && selectedItem.TargetViewModelType != null)
+            this.WindowState = WindowState.Minimized;
+        }
+
+        // 放大/還原視窗邏輯
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
             {
-                // 拿到我們的 MVVM_MainWindow
-                var vm = (MVVM_MainWindow)this.DataContext;
-
-                // 呼叫 NavigateCommand 進行畫面切換
-                vm.NavigateCommand.Execute(selectedItem.TargetViewModelType);
-
-                // (可選) 切換畫面後，自動把側邊抽屜收起來
-                MainDrawerHost.IsLeftDrawerOpen = false;
+                this.WindowState = WindowState.Normal; // 如果已放大，就還原
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized; // 如果是正常大小，就放大
             }
         }
 
-        //private void ComboBox_DropDownOpened(object sender, EventArgs e)
+        ///// <summary>
+        ///// 處理樹狀選單點擊事件
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        //private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         //{
-        //    if (this.DataContext is MVVM_MainWindow vm)
+        //    // 確定點擊到的是 NavItem，而且有設定 TargetViewModelType
+        //    if (e.NewValue is NavigationItem selectedItem && selectedItem.TargetViewModelType != null)
         //    {
-                
-        //        vm.RefreshAvailablePorts();
+        //        // 拿到我們的 MVVM_MainWindow
+        //        var vm = (MVVM_MainWindow)this.DataContext;
+
+        //        // 呼叫 NavigateCommand 進行畫面切換
+        //        vm.NavigateCommand.Execute(selectedItem.TargetViewModelType);
+
+        //        // (可選) 切換畫面後，自動把側邊抽屜收起來
+        //        MainDrawerHost.IsLeftDrawerOpen = false;
         //    }
         //}
+
+    
     }
 }

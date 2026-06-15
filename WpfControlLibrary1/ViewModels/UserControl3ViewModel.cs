@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WpfControlLibrary1.Services;
 
 namespace WpfControlLibrary1.ViewModels
 {
@@ -22,12 +23,21 @@ namespace WpfControlLibrary1.ViewModels
         /// <param name="barcode"></param>
         public void ReceiveBarcode(string barcode)
         {
-            // 一樣使用 Dispatcher 切回 UI 執行緒
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            // 檢查是否已經在 UI 執行緒，若是，直接更新，不要 Invoke
+            var dispatcher = System.Windows.Application.Current.Dispatcher;
+
+            if (dispatcher.CheckAccess())
             {
                 LastScannedBarcode = barcode;
                 MachineStatus = "P3 讀取成功，處理中...";
-            });
+            }
+            else
+            {
+                dispatcher.Invoke(() => {
+                    LastScannedBarcode = barcode;
+                    MachineStatus = "P3 讀取成功，處理中...";
+                });
+            }
         }
 
         public UserControl3ViewModel()

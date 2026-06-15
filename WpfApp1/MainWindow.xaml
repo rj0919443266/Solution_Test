@@ -5,6 +5,7 @@
                  xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
                  xmlns:views="clr-namespace:WpfControlLibrary1;assembly=WpfControlLibrary1"
                  xmlns:viewmodels_lib="clr-namespace:WpfControlLibrary1.ViewModels;assembly=WpfControlLibrary1"
+                 
                  xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
                  Title="WorkPage"
                  Height="500"
@@ -12,39 +13,187 @@
                  WindowStartupLocation="CenterScreen"
                  Background="{DynamicResource MaterialDesignPaper}"
                  TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-                 
                  WindowTitleBrush="{DynamicResource MaterialDesignPaper}"
                  NonActiveWindowTitleBrush="{DynamicResource MaterialDesignPaper}"
                  TitleForeground="{DynamicResource MaterialDesignBody}"
-                 
                  WindowButtonCommandsOverlayBehavior="Never"
-                 
                  TitleCharacterCasing="Normal"
                  GlowBrush="{DynamicResource PrimaryHueMidBrush}"
                  TitleBarHeight="50"
                  SaveWindowPosition="True"
                  ShowCloseButton="False"
-                 >
-    <!--分頁資源-->
+                 ShowMinButton="False"
+                 ShowMaxRestoreButton="False">
+
     <Window.Resources>
+        <!-- 左側抽屜樣板 -->
+        <DataTemplate x:Key="RecursiveMenuTemplate">
+            <ContentControl Content="{Binding}">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+
+                        <!-- 預設 (無子節點)：渲染單純按鈕 -->
+                        <Setter Property="ContentTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}"
+                                                 GroupName="MainMenu"
+                                                 Height="48"
+                                                 Margin="8,2"
+                                                 Padding="16,0"
+                                                 HorizontalContentAlignment="Left"
+                                                 Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                 CommandParameter="{Binding TargetViewModelType}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="{Binding Icon}"
+                                                                     Width="24"
+                                                                     Height="24"
+                                                                     VerticalAlignment="Center"
+                                                                     Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                            <TextBlock Text="{Binding Title}"
+                                                       Margin="16,0,0,0"
+                                                       FontSize="16"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </RadioButton>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+
+                        <!-- 條件 (有子節點)：渲染手風琴，並遞迴呼叫自己 -->
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasSubItems}"
+                                         Value="True">
+                                <Setter Property="ContentTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <Expander Style="{StaticResource MaterialDesignExpander}"
+                                                      IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                                                      Background="Transparent"
+                                                      Margin="8,2">
+                                                <Expander.Header>
+                                                    <StackPanel Orientation="Horizontal"
+                                                               
+                                                                Margin="-10,0,0,0">
+                                                        <materialDesign:PackIcon Kind="{Binding Icon}"
+                                                                                 Width="24"
+                                                                                 Height="24"
+                                                                                 VerticalAlignment="Center"
+                                                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                                        <TextBlock Text="{Binding Title}"
+                                                                   Margin="16,0,0,0"
+                                                                   FontSize="16"
+                                                                   FontWeight="SemiBold"
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Expander.Header>
+
+                                                <!-- 🌟 核心魔法：ItemTemplate 透過 DynamicResource 再次綁定自己！ -->
+                                                <!-- Margin="24,0,0,0" 確保每深一層，就會自動往右縮排 24px -->
+                                                <ItemsControl ItemsSource="{Binding SubItems}"
+                                                              ItemTemplate="{DynamicResource RecursiveMenuTemplate}"
+                                                              Margin="24,0,0,8" />
+                                            </Expander>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </DataTemplate>
+        <!-- 分頁樣板 -->
+        <!--=========================================通用訊息提示-->
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_CommonDialog}">
+            <views:UserControl_CommonDialog />
+        </DataTemplate>
+        <!--=========================================System_SetDetail 相關--> 
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail}">
+            <views:UserControl_System_SetDetail />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_ListUserEditDialog}">
+            <views:UserControl_System_SetDetail_ListUserEditDialog/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_ProcessDepartmentEditDialog}">
+            <views:UserControl_System_SetDetail_ProcessDepartmentEditDialog/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_EqNoEditDialog}">
+            <views:UserControl_System_SetDetail_ListEqNoEditDialog />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_ProcessAnomalyEditDialog}">
+            <views:UserControl_System_SetDetail_ProcessAnomalyEditDialog />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_QualityAbnormalActionEditDialog}">
+            <views:UserControl_System_SetDetail_QualityAbnormalActionEditDialog />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_ProblemClassificationEditDialog}">
+            <views:UserControl_System_SetDetail_ProblemClassificationEditDialog />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_InstructionSetNumEditDialog}">
+            <views:UserControl_System_SetDetail_InstructionSetNumEditDialog />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_InstructionSetTimeEditDialog}">
+            <views:UserControl_System_SetDetail_InstructionSetTimeEditDialog />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_InstructionSetRemarkEditDialog}">
+            <views:UserControl_System_SetDetail_InstructionSetRemarkEditDialog />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_ListWorkStationEditDialog}">
+            <views:UserControl_System_SetDetail_ListWorkStationEditDialog />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_System_SetDetail_ListWorkStationTwinsEditDialog}">
+            <views:UserControl_System_SetDetail_ListWorkStationTwinsEditDialog />
+        </DataTemplate>
+
+
+        <!--========================主介面-->
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_WorkPageDataEdit}">
+            <views:UserControl_WorkPageDataEdit />
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_WipStatus}">
+            <views:UserControl_WipStatus />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:MVVM_SystemConfig}">
+            <views:UserControl_SystemComfig />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_Login}">
+            <views:UserControl_Login />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_UserControl_temp}">
+            <views:UserControl_Temp />
+        </DataTemplate>
+
+
+        <!--=========================================測試用介面-->
         <DataTemplate DataType="{x:Type viewmodels_lib:UserControl1ViewModel}">
             <views:UserControl1 />
         </DataTemplate>
+        
         <DataTemplate DataType="{x:Type viewmodels_lib:UserControl2ViewModel}">
             <views:UserControl2 />
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewmodels_lib:UserControl3ViewModel}">
             <views:UserControl3 />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewmodels_lib:MVVM_SystemConfig}">
-            <views:UserControl_SystemComfig/>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_UserControl4}">
+            <views:UserControl4 />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type viewmodels_lib:VM_Login}">
-            <views:UserControl_Login />
-        </DataTemplate>
+
     </Window.Resources>
-    
-    <!--抬頭設計樣板-->
+
     <mah:MetroWindow.TitleTemplate>
         <DataTemplate>
             <StackPanel Orientation="Vertical"
@@ -62,19 +211,15 @@
             </StackPanel>
         </DataTemplate>
     </mah:MetroWindow.TitleTemplate>
-    <!--左抬頭 按鈕與版本顯示-->
+
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <ToggleButton Style="{StaticResource MaterialDesignHamburgerToggleButton}"
-                          IsChecked="{Binding IsLeftDrawerOpen, ElementName=MainDrawerHost}"
+                          IsChecked="{Binding IsMenuOpen}"
                           Margin="10,0,10,0" />
-            <!--<TextBlock Text="{Binding FileVersion}"
-                       VerticalAlignment="Center"
-                       Margin="10,0"
-                       Foreground="Gray" />-->
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
-    <!--右抬頭 顯示-->
+
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
             <StackPanel Orientation="Horizontal"
@@ -83,6 +228,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,5,0" />
                 <TextBlock Text="{Binding User_ID}"
+                           FontSize="16"
                            FontWeight="Bold"
                            VerticalAlignment="Center" />
                 <Border Width="1"
@@ -91,20 +237,70 @@
                         Margin="10,0"
                         VerticalAlignment="Center" />
                 <TextBlock Text="{Binding User_Name}"
+                           FontSize="16"
                            FontWeight="Bold"
                            VerticalAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal"
-                        Margin="10,0">
-                <materialDesign:PackIcon Kind="ServerNetwork"
+                        VerticalAlignment="Center">
+
+                <materialDesign:PackIcon Kind="LanPending"
                                          VerticalAlignment="Center"
                                          Margin="0,0,5,0" />
-                <TextBlock Text="Server: "
-                           VerticalAlignment="Center" />
-                <TextBlock Text="{Binding PhpConnectionStatus}"
+                <TextBlock Text="伺服器: "
                            FontWeight="Bold"
+                           FontSize="16"
                            VerticalAlignment="Center" />
+                
+                <!--<TextBlock VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           FontSize="16">
+                </TextBlock>-->
+
+                <TextBlock VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           FontSize="14"
+                           Margin="4,0,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed" />
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ServerState}"
+                                             Value="Offline">
+                                    <Setter Property="Visibility"
+                                            Value="Visible" />
+                                    <Setter Property="Text"
+                                            Value="{Binding StateDurationString, StringFormat=' (已斷線 {0})'}" />
+                                    <Setter Property="Foreground"
+                                            Value="Red" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding ServerState}"
+                                             Value="Online">
+                                    <Setter Property="Visibility"
+                                            Value="Visible" />
+                                    <Setter Property="Text"
+                                            Value="{Binding StateDurationString, StringFormat=' (連線中 {0})'}" />
+                                    <Setter Property="Foreground"
+                                            Value="LimeGreen" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding ServerState}"
+                                             Value="Testing">
+                                    <Setter Property="Visibility"
+                                            Value="Visible" />
+                                    <Setter Property="Text"
+                                            Value="{Binding StateDurationString, StringFormat=' (連線測試中 {0})'}" />
+                                    <Setter Property="Foreground"
+                                            Value="OrangeRed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal"
@@ -113,20 +309,12 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,5,0" />
                 <TextBlock Text="掃碼槍: "
+                           FontWeight="Bold"
+                           FontSize="16"
                            VerticalAlignment="Center" />
-                
-                <!--<ComboBox ItemsSource="{Binding AvailablePorts}"
-                          SelectedItem="{Binding SelectedPort}"
-                          Margin="16,4"
-                          Style="{StaticResource MaterialDesignComboBox}">
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="DropDownOpened">
-                            <b:InvokeCommandAction Command="{Binding RefreshAvailablePorts}" />
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
-                </ComboBox>-->
 
                 <TextBlock Text="{Binding ScannerStatus}"
+                           FontSize="16"
                            FontWeight="Bold"
                            VerticalAlignment="Center">
                     <TextBlock.Style>
@@ -175,24 +363,49 @@
                 </Button>
             </StackPanel>
 
+            <Button Click="MinimizeButton_Click"
+                    Width="40"
+                    Height="40"
+                    ToolTip="縮小">
+                <materialDesign:PackIcon Kind="WindowMinimize"
+                                         Width="20"
+                                         Height="20"
+                                         Foreground="{DynamicResource MaterialDesignBody}" />
+            </Button>
+
+            <Button Click="MaximizeButton_Click"
+                    Width="40"
+                    Height="40"
+                    ToolTip="放大/還原">
+                <materialDesign:PackIcon Kind="WindowMaximize"
+                                         Width="20"
+                                         Height="20"
+                                         Foreground="{DynamicResource MaterialDesignBody}" />
+            </Button>
+
             <materialDesign:PopupBox PlacementMode="BottomAndAlignRightEdges"
                                      StaysOpen="False"
                                      Margin="10,0,10,0"
                                      VerticalAlignment="Center">
-                <StackPanel Width="180">
-                   
+
+                <StackPanel Width="200">
+
                     <Separator Background="{DynamicResource MaterialDesignDivider}" />
 
                     <Button Style="{StaticResource MaterialDesignFlatButton}"
                             HorizontalContentAlignment="Left"
-                            Command="{Binding LoginCommand}">
+                            Height="48"
+                            Padding="16,0"
+                            Command="{Binding ToggleLoginStateCommand}">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Account"
-                                                     Width="18"
-                                                     Height="18"
+                            <materialDesign:PackIcon Kind="{Binding LoginButtonIcon}"
+                                                     Width="22"
+                                                     Height="22"
                                                      VerticalAlignment="Center"
-                                                     Margin="0,0,12,0" />
-                            <TextBlock Text="登入/登出"
+                                                     Margin="0,0,16,0" />
+                            <TextBlock Text="{Binding LoginButtonText}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
                                        VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
@@ -202,76 +415,219 @@
                     <Button Style="{StaticResource MaterialDesignFlatButton}"
                             HorizontalContentAlignment="Left"
                             Foreground="DeepPink"
-                            FontWeight="Bold"
+                            Height="48"
+                            Padding="16,0"
                             Click="CloseButton_Click">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Power"
-                                                     Width="18"
-                                                     Height="18"
+                                                     Width="22"
+                                                     Height="22"
                                                      VerticalAlignment="Center"
-                                                     Margin="0,0,12,0" />
+                                                     Margin="0,0,16,0" />
                             <TextBlock Text="關閉程式"
+                                       FontSize="16"
+                                       FontWeight="Bold"
                                        VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
+
+                    <Border Height="8" />
                 </StackPanel>
             </materialDesign:PopupBox>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
-    <materialDesign:DialogHost Identifier="RootDialog" DialogTheme="Inherit">
-        <materialDesign:DrawerHost x:Name="MainDrawerHost">
-            
-        <materialDesign:DrawerHost.LeftDrawerContent>
-            <Grid Width="280"
-                  Background="{DynamicResource MaterialDesignPaper}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0"
-                           Text="功能導覽"
-                           FontSize="18"
-                           FontWeight="Bold"
-                           Margin="16,24,16,16" />
+    <materialDesign:DialogHost Identifier="RootDialog"
+                               DialogTheme="Inherit"
+                               CloseOnClickAway="True">
+        <materialDesign:DrawerHost x:Name="MainDrawerHost"
+                                   IsLeftDrawerOpen="{Binding IsMenuOpen}">
 
-                <TreeView Grid.Row="1"
-                          ItemsSource="{Binding MenuItems}"
-                          Style="{StaticResource MaterialDesignTreeView}"
-                          SelectedItemChanged="TreeView_SelectedItemChanged">
+            <materialDesign:DrawerHost.LeftDrawerContent>
+                <Grid Width="280"
+                      Background="{DynamicResource MaterialDesignPaper}"
+                      TextElement.Foreground="{DynamicResource MaterialDesignBody}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                    <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding SubItems}">
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="8,4">
-                                <materialDesign:PackIcon Kind="{Binding Icon}"
-                                                         Width="24"
-                                                         Height="24"
-                                                         VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Title}"
-                                           Margin="16,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="15" />
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                    </TreeView.ItemTemplate>
+                    <TextBlock Grid.Row="0"
+                               Text="系統導覽"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="16,24,16,16" />
 
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="TreeViewItem"
-                               BasedOn="{StaticResource MaterialDesignTreeViewItem}">
-                            <Setter Property="Padding"
-                                    Value="8" />
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                </TreeView>
-            </Grid>
-        </materialDesign:DrawerHost.LeftDrawerContent>
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  CanContentScroll="False"
+                                  Padding="0,0,0,24">
+                    
+                        <ItemsControl ItemsSource="{Binding MenuItems}"
+                                      ItemTemplate="{StaticResource RecursiveMenuTemplate}" />
+                    </ScrollViewer>
+
+                </Grid>
+            </materialDesign:DrawerHost.LeftDrawerContent>
 
             <Grid>
                 <ContentControl Content="{Binding CurrentView}"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Margin="10" />
+                                Margin="5" />
+                <materialDesign:Snackbar MessageQueue="{Binding MainSnackbarMessageQueue}"
+                                         HorizontalAlignment="Stretch">
+
+                    <materialDesign:Snackbar.Resources>
+                        <Style TargetType="{x:Type materialDesign:SnackbarMessage}">
+
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Left" />
+
+                            <Setter Property="Padding"
+                                    Value="16,14" />
+
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <materialDesign:PackIcon Grid.Column="0"
+                                                                     Width="24"
+                                                                     Height="24"
+                                                                     Margin="0,0,12,0"
+                                                                     VerticalAlignment="Center">
+                                                <materialDesign:PackIcon.Style>
+                                                    <Style TargetType="materialDesign:PackIcon">
+                                                        <Setter Property="Kind"
+                                                                Value="InformationCircle" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding MessageType}"
+                                                                         Value="Information">
+                                                                <Setter Property="Kind"
+                                                                        Value="InformationCircle" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding MessageType}"
+                                                                         Value="Success">
+                                                                <Setter Property="Kind"
+                                                                        Value="CheckCircle" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding MessageType}"
+                                                                         Value="Warning">
+                                                                <Setter Property="Kind"
+                                                                        Value="AlertCircleOutline" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding MessageType}"
+                                                                         Value="Error">
+                                                                <Setter Property="Kind"
+                                                                        Value="CloseCircle" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </materialDesign:PackIcon.Style>
+                                            </materialDesign:PackIcon>
+
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Text}"
+                                                       VerticalAlignment="Center"
+                                                       TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </materialDesign:Snackbar.Resources>
+
+                    <materialDesign:Snackbar.Style>
+                        <Style TargetType="materialDesign:Snackbar"
+                               BasedOn="{StaticResource {x:Type materialDesign:Snackbar}}">
+                            <Setter Property="FontSize"
+                                    Value="16" />
+                            <Setter Property="FontWeight"
+                                    Value="SemiBold" />
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Message.Content.MessageType, RelativeSource={RelativeSource Self}}"
+                                             Value="Information">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="DodgerBlue"
+                                                             Opacity="0.6" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground"
+                                            Value="White" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Message.Content.MessageType, RelativeSource={RelativeSource Self}}"
+                                             Value="Success">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="ForestGreen"
+                                                             Opacity="0.6" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground"
+                                            Value="White" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Message.Content.MessageType, RelativeSource={RelativeSource Self}}"
+                                             Value="Warning">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="DarkOrange"
+                                                             Opacity="0.6" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground"
+                                            Value="White" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding Message.Content.MessageType, RelativeSource={RelativeSource Self}}"
+                                             Value="Error">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="Red"
+                                                             Opacity="0.6" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground"
+                                            Value="White" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:Snackbar.Style>
+
+                    <materialDesign:Snackbar.ActionButtonStyle>
+                        <Style TargetType="{x:Type Button}"
+                               BasedOn="{StaticResource MaterialDesignRaisedDarkButton}">
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource SecondaryHueMidBrush}" />
+                            <Setter Property="BorderBrush"
+                                    Value="{DynamicResource SecondaryHueMidBrush}" />
+                            <Setter Property="FontSize"
+                                    Value="16" />
+                            <Setter Property="FontWeight"
+                                    Value="Bold" />
+                            <Setter Property="Height"
+                                    Value="32" />
+                            <Setter Property="Padding"
+                                    Value="16,0" />
+                            <Setter Property="Margin"
+                                    Value="0,0,8,0" />
+                            <Setter Property="materialDesign:ButtonAssist.CornerRadius"
+                                    Value="16" />
+                        </Style>
+                    </materialDesign:Snackbar.ActionButtonStyle>
+
+                </materialDesign:Snackbar>
+
             </Grid>
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>

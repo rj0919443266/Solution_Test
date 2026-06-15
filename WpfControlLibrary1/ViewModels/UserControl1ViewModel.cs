@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WpfControlLibrary1.Services;
 
 namespace WpfControlLibrary1.ViewModels
 {
@@ -17,18 +18,27 @@ namespace WpfControlLibrary1.ViewModels
         private string _lastScannedBarcode = "尚未掃描";
         public UserControl1ViewModel()
         {
-            WeakReferenceMessenger.Default.Register<BarcodeScannedMessage>(this, (recipient, message) =>
+            //WeakReferenceMessenger.Default.Register<BarcodeScannedMessage>(this, (recipient, message) =>
+            //{
+            //    // 使用 Application.Current.Dispatcher 將動作排入 UI 執行緒
+            //    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //    {
+            //        LastScannedBarcode = message.Barcode;
+            //        MachineStatus = "讀取成功，處理中...";
+            //        // 如果是操作 ObservableCollection.Add()，絕對必須包在這裡面！
+            //    });
+            //});
+            
+            WeakReferenceMessenger.Default.Register<UserControl1ViewModel, BarcodeScannedMessage>(this, (r, message) =>
             {
-                // 使用 Application.Current.Dispatcher 將動作排入 UI 執行緒
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                // 1. 改用 InvokeAsync 避免死鎖
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    LastScannedBarcode = message.Barcode;
-                    MachineStatus = "讀取成功，處理中...";
-                    // 如果是操作 ObservableCollection.Add()，絕對必須包在這裡面！
+                    // 2. 此時 r 已經被強型別確認為 UserControl1ViewModel，編譯會完美通過！
+                    r.LastScannedBarcode = message.Barcode;
+                    r.MachineStatus = "讀取成功，處理中...";
                 });
             });
         }
-
-
     }
 }

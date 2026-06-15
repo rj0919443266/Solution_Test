@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:WpfControlLibrary1"
              mc:Ignorable="d"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:helpers="clr-namespace:WpfControlLibrary1"
              Width="350"
              Padding="24">
     <StackPanel>
@@ -13,7 +14,7 @@
                                  Width="60"
                                  Height="60"
                                  HorizontalAlignment="Center"
-                                 Foreground="{DynamicResource MaterialDesignPrimaryBrush}"
+                                 Foreground="{DynamicResource MaterialDesignBody}"
                                  Margin="0,0,0,16" />
         <TextBlock Text="系統登入"
                    FontSize="24"
@@ -22,19 +23,24 @@
                    Margin="0,0,0,24" />
 
         <TextBox Text="{Binding Account}"
+                 FontSize="16"
                  materialDesign:HintAssist.Hint="員工編號"
                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                  Margin="0,0,0,16" />
-        <TextBox Text="{Binding Password}"
-                 materialDesign:HintAssist.Hint="密碼"
-                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                 Margin="0,0,0,8" />
+        <PasswordBox x:Name="txtPassword"
+                     FontSize="16"
+                     materialDesign:HintAssist.Hint="密碼"
+                     Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                     Margin="0,0,0,8"
+                     helpers:PasswordHelper.BindPassword="True"
+                     helpers:PasswordHelper.BoundPassword="{Binding Password}" />
 
         <TextBlock Text="{Binding ErrorMessage}"
                    Foreground="Red"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,16"
-                   Height="20" />
+                   MinHeight="20"
+                   TextWrapping="Wrap" />
 
         <Grid>
             <Grid.ColumnDefinitions>
@@ -45,10 +51,13 @@
                     Content="取消"
                     Style="{StaticResource MaterialDesignOutlinedButton}"
                     Margin="0,0,8,0" />
+            <!--MaterialDesignFlatButton-->
             <Button Command="{Binding ExecuteLoginCommand}"
                     Content="登入"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
                     Grid.Column="1"
                     Margin="8,0,0,0" />
+            <!--MaterialDesignRaisedButton-->
         </Grid>
     </StackPanel>
 </UserControl>

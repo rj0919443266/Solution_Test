@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input; // 為了使用 [RelayCommand]
 using CommunityToolkit.Mvvm.Messaging;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
+using Notifications.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,8 +15,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using WpfControlLibrary1;
 using WpfControlLibrary1.Mode;
+using WpfControlLibrary1.Services;
 using WpfControlLibrary1.ViewModels;
 
 
@@ -23,34 +27,78 @@ namespace WpfApp1.ViewModels
     public partial class MVVM_MainWindow : ObservableObject, IDisposable
     {
         private readonly IServiceProvider _serviceProvider; //  宣告 DI 容器
+
+        private readonly ISnackbarService _snackbarService;
+        private readonly INotificationService _notificationService; // 吐司 訊息通知服務
+
+        private readonly ILogService _logService; //  Log 服務
+
         private readonly SystemConfig _config;
         private readonly IMessenger _messenger;// 宣告 Messenger
+        private readonly ApiService _apiService;
         private readonly BarcodeScannerService _scannerService; //掃描槍服務
-
+        //===========================================================
+       
+     
+         public ISnackbarMessageQueue MainSnackbarMessageQueue { get; }
+        [ObservableProperty]
+        private SnackbarMessageType _currentSnackbarType = SnackbarMessageType.Information;
         //===========================================================主畫面
         [ObservableProperty]
         private object _currentView = null;
+
+        [ObservableProperty]
+        private bool _isMenuOpen = false; // 控制左側抽屜開關
+
         //===========================================================導覽列
-        public ObservableCollection<NavItem> MenuItems { get; set; }
-        //===========================================================
+        // 🌟 將 public 改為 private！
+        [ObservableProperty]
+        private ObservableCollection<NavigationItem> _menuItems = new ObservableCollection<NavigationItem>();
+
+        [ObservableProperty]
+        private NavigationItem _selectedMenuItem;
+        //===========================================================版本
         [ObservableProperty]
         private string _fileVersion;
-        //===========================================================
+
+
+        //===========================================================php server
+        //[ObservableProperty]
+        //private string _phpConnectionStatus = "未連線";
+
         [ObservableProperty]
-        private string _phpConnectionStatus = "未連線";
+        private string _stateDurationString = "";
+
+        [ObservableProperty]
+        private PhpServerState _serverState = PhpServerState.Testing;
+
+        // 狀態起始時間
+        private DateTime? _stateStartTime = null;
+
+        //負責每秒更新 UI (時間) 的計時器
+        private DispatcherTimer _uiTimer;
         //===========================================================COM Port 連線狀態
         [ObservableProperty]
         private string _scannerStatus = "NA";
 
         [ObservableProperty]
         private ScannerConnectionState _connectionState = ScannerConnectionState.NotSet;
-
+       
         // 電腦目前可用的 COM Port 清單
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
 
         // 使用者目前選中的 COM Port
         [ObservableProperty] 
         private string _selectedPort = "COM3";
+        //===========================================================
+        [ObservableProperty]
+        private bool _isLoggedIn = false;
+
+        [ObservableProperty]
+        private string _loginButtonText = "系統登入";
+
+        [ObservableProperty]
+        private PackIconKind _loginButtonIcon = PackIconKind.Login;
         //===========================================================
         [ObservableProperty]
         private string _user_ID = "NA";
@@ -62,97 +110,399 @@ namespace WpfApp1.ViewModels
 
      
 
-        public MVVM_MainWindow(IServiceProvider serviceProvider, IMessenger messenger, BarcodeScannerService scannerService, SystemConfig config)
+        public MVVM_MainWindow(
+            IServiceProvider serviceProvider,
+            ILogService logService,
+            ISnackbarService snackbarService,
+            INotificationService notificationService,
+            IMessenger messenger,
+            ApiService apiService,
+            BarcodeScannerService scannerService,
+            SystemConfig config)
         {
-            //===========================================================DI
+
+            //===========================================================DI容器
             _serviceProvider = serviceProvider;
+            //===========================================================吐司訊息 服務
+            _notificationService = notificationService;
+            //===========================================================Snackbar 服務
+            _snackbarService = snackbarService;
+            MainSnackbarMessageQueue = _serviceProvider.GetRequiredService<ISnackbarMessageQueue>();
+            //===========================================================設定檔
+            _config = config;
+            //===========================================================Log 服務
+            _logService = logService;
+            //===========================================================php server
+            _apiService = apiService;
+            StartHeartbeat(); //啟動心跳偵測
+            StartUiTimer(); //一秒一次
+            //===========================================================
+            _scannerService = scannerService; // 條碼槍服務
             //===========================================================版本
             FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(Process.GetCurrentProcess().MainModule.FileName);
             FileVersion = versionInfo.FileVersion;
-            //===========================================================設定檔
-            _config = config;
-            //===========================================================
-            _scannerService = scannerService; // 接收條碼槍服務
+
+            //===========================================================ComPort
             SelectedPort = _config.BarcodeComPort;
             //自動偵測電腦當前所有的實體 COM Port
             RefreshAvailablePorts();
 
-            //初始化嘗試連線預設的 Port
-            ExecuteConnect(SelectedPort);
+            //  判斷設定檔的 COM Port 是否存在於當前硬體清單中
+            if (!string.IsNullOrEmpty(SelectedPort) && !AvailablePorts.Contains(SelectedPort))
+            {
+                // 將狀態設為 Failed，這會觸發 MainWindow.xaml 裡的 DataTrigger 變成「紅字」
+                ConnectionState = ScannerConnectionState.Failed;
+                ScannerStatus = $"{SelectedPort} (連線失敗)";
+               
+
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _snackbarService.ShowSnackbar($"條碼槍 [{SelectedPort}] 已中斷連線！請檢查 USB 線路。",
+                                SnackbarMessageType.Error,
+                                "重新連線", () => Reconnect()
+                     );
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+
+            }
+            else
+            {
+                // 如果存在，才執行預設的自動連線
+                ExecuteConnect(SelectedPort);
+            }
+           
             //===========================================================
             _messenger = messenger;
-            //============================================================由主視窗來負責監聽硬體條碼槍的廣播
-            _messenger.Register<BarcodeScannedMessage>(this, (recipient, message) =>
+
+            //=============================註冊監聽 SnackbarService 發送來的廣播
+            _messenger.Register<MVVM_MainWindow, SnackbarRequestMessage>(this, (r, message) =>
             {
-                // 核心路由器邏輯：
-                // 檢查目前的畫面 (CurrentView) 是不是一個「條碼接收器」
-                if (CurrentView is IBarcodeReceiver receiver)
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    // 如果是，就把條碼專屬遞給這個當前畫面！
-                    receiver.ReceiveBarcode(message.Barcode);
-                }
+                    // 🌟 加上 r. 存取
+                    if (message.ClearQueue && r.MainSnackbarMessageQueue is SnackbarMessageQueue queue)
+                    {
+                        queue.Clear();
+                    }
+
+                    var snackbarModel = new CustomSnackbarModel
+                    {
+                        Text = message.Message,
+                        MessageType = message.Type.ToString()
+                    };
+
+                    if (!string.IsNullOrEmpty(message.ActionContent) && message.ActionHandler != null)
+                    {
+                        r.MainSnackbarMessageQueue.Enqueue(snackbarModel, message.ActionContent, message.ActionHandler);
+                    }
+                    else
+                    {
+                        r.MainSnackbarMessageQueue.Enqueue(snackbarModel);
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            });
+
+            //=============================由主視窗來負責監聽硬體條碼槍的廣播
+            _messenger.Register<MVVM_MainWindow, BarcodeScannedMessage>(this, (r, message) =>
+            {
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    //  加上 r. 存取
+                    if (r.CurrentView is IBarcodeReceiver receiver)
+                    {
+                        receiver.ReceiveBarcode(message.Barcode);
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
             });
 
             //============================================================ 偵聽「ComPort硬體實體斷線」廣播
-            _messenger.Register<DeviceDisconnectedMessage>(this, (recipient, message) =>
+            _messenger.Register<MVVM_MainWindow, DeviceDisconnectedMessage>(this, (r, message) =>
             {
-                // 因為 Timer 是在背景執行緒觸發的，修改 UI 綁定的屬性必須回到主執行緒
-                Application.Current.Dispatcher.Invoke(() =>
+                // 改用 InvokeAsync 防止死鎖
+                Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // 變更標題列的狀態文字
-                    ScannerStatus = $"{message.PortName} (異常斷線)";
-                    ConnectionState = ScannerConnectionState.Disconnected;
-                    // 強制更新一次可用的 Port 清單 (讓 ComboBox 的失效選項消失)
-                    RefreshAvailablePorts();
+                    // 加上 r. 存取
+                    r.ScannerStatus = $"{message.PortName} (異常斷線)";
+                    r.ConnectionState = ScannerConnectionState.Disconnected;
+                    r.RefreshAvailablePorts();
 
-                    // 彈出嚴重警告視窗
-                    MessageBox.Show(
-                        $"系統偵測到條碼槍 [{message.PortName}] 已中斷連線！\n\n請檢查 USB 線路是否鬆脫，重新插拔後點擊右上角「重新連線」按鈕。",
-                        "硬體斷線警告",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                    r._snackbarService.ShowSnackbar($"條碼槍 [{message.PortName}] 已中斷連線！請檢查 USB 線路。",
+                                SnackbarMessageType.Error,
+                                "重新連線", () => r.Reconnect()
+                    );
                 });
             });
 
             //============================================================ 監聽「設定已改變」廣播 
-            _messenger.Register<SystemConfig_Change_Message>(this, (recipient, message) =>
+            _messenger.Register<MVVM_MainWindow, SystemConfig_Change_Message>(this, (r, message) =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // 1. 將 MainWindow 自己的 SelectedPort 更新為最新的設定檔數值
-
-                    SelectedPort = _config.BarcodeComPort;
-
-                    // 2. 自動觸發重新連線流程 (使用者連按鈕都不用按)
-                    Reconnect();
+                    r.SelectedPort = r._config.BarcodeComPort;
+                    r.Reconnect();
                 });
             });
-            // --
-
-            // 初始化選單項目
-            MenuItems = new ObservableCollection<NavItem>();
-
-            MenuItems.Add(new NavItem { Title = "Home"    , Icon = MaterialDesignThemes.Wpf.PackIconKind.Home    , TargetViewModelType = typeof(UserControl1ViewModel) });
-            MenuItems.Add(new NavItem { Title = "Controls", Icon = MaterialDesignThemes.Wpf.PackIconKind.Settings, TargetViewModelType = typeof(UserControl2ViewModel) });
-            MenuItems.Add(new NavItem { Title = "Controls", Icon = MaterialDesignThemes.Wpf.PackIconKind.Settings, TargetViewModelType = typeof(UserControl3ViewModel) });
-            var controlsItem = new NavItem { Title = "Controls", Icon = PackIconKind.ViewDashboardOutline };
-            controlsItem.SubItems.Add(new NavItem { Title = "Buttons", Icon = PackIconKind.GestureTapButton });
-            controlsItem.SubItems.Add(new NavItem { Title = "Cards", Icon = PackIconKind.CardsOutline });
-            controlsItem.SubItems.Add(new NavItem { Title = "Chips", Icon = PackIconKind.SizeS });
-            MenuItems.Add(controlsItem);
-            MenuItems.Add(new NavItem { Title = "About", Icon = MaterialDesignThemes.Wpf.PackIconKind.Information });
-            MenuItems.Add(new NavItem { Title = "系統設定", Icon = PackIconKind.Cog, TargetViewModelType = typeof(MVVM_SystemConfig) });
             //============================================================
-            Navigate(typeof(UserControl1ViewModel));//預設初始畫面
-
+            GenerateMenu(0);
+            //============================================================
+            Navigate(typeof(VM_WorkPageDataEdit));
+            //Navigate(typeof(VM_UserControl_temp));
+            
+            //============================================================
+            _logService.Log("系統啟動，主畫面已成功載入。");
         }
 
 
         public void Dispose()
         {
-            // ViewModel 被釋放時呼叫
+            // 1. 停止並清空所有的計時器 (非常重要！切斷 Timer 對 ViewModel 的綁架)
+            if (_pingTimer != null)
+            {
+                _pingTimer.Stop();
+                _pingTimer = null;
+            }
+
+            if (_uiTimer != null)
+            {
+                _uiTimer.Stop();
+                _uiTimer = null;
+            }
+
+            // 2. 解除所有 Messenger 廣播監聽
             _messenger.UnregisterAll(this);
         }
+        #region "PHP 伺服器心跳檢測 (Heartbeat)"
+
+        private DispatcherTimer _pingTimer;
+        private void StartHeartbeat()
+        {
+            _pingTimer = new DispatcherTimer();
+            _pingTimer.Interval = TimeSpan.FromSeconds(3);
+
+            // 🌟 關鍵修正：進入時先 Stop，執行完再 Start，防止請求重疊塞車
+            _pingTimer.Tick += async (s, e) =>
+            {
+                _pingTimer.Stop();
+                await CheckServerStatusAsync();
+                _pingTimer.Start();
+            };
+
+            _pingTimer.Start();
+            _ = CheckServerStatusAsync();
+        }
+
+        // ==========================================
+        // 持續運行的 UI 計時器
+        // ==========================================
+        private void StartUiTimer()
+        {
+            _uiTimer = new DispatcherTimer();
+            _uiTimer.Interval = TimeSpan.FromSeconds(1);
+            _uiTimer.Tick += (s, e) =>
+            {
+                // (可選) 讓畫面上的時鐘也跟著跳
+                CurrentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                // 只要有記錄起點，就持續計算「當前狀態」維持了多久
+                if (_stateStartTime.HasValue)
+                {
+                    TimeSpan duration = DateTime.Now - _stateStartTime.Value;
+                    StateDurationString = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}";
+                }
+            };
+            _uiTimer.Start(); 
+        }
+
+
+
+        private async Task CheckServerStatusAsync()
+        {
+            // 呼叫 API 進行 Ping (現在是打靜態檔案了)
+            var result = await _apiService.PingServerAsync();
+
+            // 先決定這次 Ping 回來的「新狀態」是什麼
+            PhpServerState newState;
+
+            if (result.IsSuccess)
+            {
+                // 依據是否登入給予對應狀態
+                newState =  PhpServerState.Online ;
+
+                // 伺服器健康，把下次偵測時間拉長到 30 秒！
+                if (_pingTimer.Interval.TotalSeconds != 30)
+                {
+                    _pingTimer.Interval = TimeSpan.FromSeconds(30);
+                }
+            }
+            else
+            {
+                newState = PhpServerState.Offline;
+
+                // ：斷線了！把偵測時間縮短為 3 秒，積極尋找網路恢復的瞬間！
+                if (_pingTimer.Interval.TotalSeconds != 3)
+                {
+                    _pingTimer.Interval = TimeSpan.FromSeconds(3);
+                }
+            }
+
+            // 如果狀態發生改變，就重新開始計算「狀態持續時間」
+            if (ServerState != newState)
+            {
+                // 🌟 核心關鍵：在重置時間起點之前，先把「上一個狀態維持的總時長」拿出來備用！
+                // (例如：如果是從斷線恢復，這串文字就會是 "00:05:23"，代表總共斷線了五分多鐘)
+                string lastDuration = string.IsNullOrEmpty(StateDurationString) ? "00:00:00" : StateDurationString;
+
+                // 1. 紀錄狀態改變的當下時間 (重置下一個狀態的起始時間)
+                _stateStartTime = DateTime.Now;
+
+                // 2. 判斷是斷線還是恢復連線，並寫入 Log
+                if (newState == PhpServerState.Offline)
+                {
+                    // 變成斷線狀態 (黃色警告)
+                    _logService.Log($"PHP 伺服器心跳檢測失敗，已中斷連線！(前次穩定連線時長: {lastDuration}，目標網址: {_config.PhpServerUrl})", LogLevel.Warning);
+                }
+                else if (newState == PhpServerState.Online && ServerState == PhpServerState.Offline)
+                {
+                    // 從斷線恢復為正常連線 (成功資訊)
+                    _logService.Log($"PHP 伺服器連線已成功恢復！(本次異常斷線總時長: {lastDuration})", LogLevel.Success);
+                }
+                else if (newState == PhpServerState.Online && ServerState == PhpServerState.Testing)
+                {
+                    // 程式剛開啟時的初次連線成功 (成功資訊)
+                    _logService.Log($"PHP 伺服器初次連線成功。(連線準備耗時: {lastDuration}，目標網址: {_config.PhpServerUrl})", LogLevel.Success);
+                }
+            }
+
+            // 正式更新綁定給 UI 的狀態
+            ServerState = newState;
+        }
+
+        #endregion
+
+        #region "導覽選單 (Permission Filter)"
+
+        private readonly List<NavigationItem> _allSystemMenus = new()
+        {
+            // 首頁與總覽
+           // new NavigationItem { Title = "Home", Icon = PackIconKind.Home, RequiredLevel = 0, TargetViewModelType = typeof(UserControl1ViewModel) },
+            new NavigationItem {Title = "工單 資訊輸入",Icon = PackIconKind.FileDocumentEditOutline,TargetViewModelType = typeof(VM_WorkPageDataEdit)},
+            new NavigationItem { Title = "IPI ", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+            new NavigationItem { Title = "FIR", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+            new NavigationItem { Title = "品質異常單", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+            new NavigationItem { Title = "設備及時狀態", Icon = PackIconKind.MonitorDashboard, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+    
+   
+            // 群組節點：資訊查詢
+            new NavigationItem
+            {
+                Title = "資訊查詢",
+                Icon = PackIconKind.DatabaseSearchOutline,
+                RequiredLevel = 0,
+                TargetViewModelType = null,
+                SubItems =
+                {
+                     new NavigationItem { Title = "過站狀態", Icon = PackIconKind.TransitConnection, RequiredLevel = 0, TargetViewModelType = typeof(VM_WipStatus) },
+                     new NavigationItem { Title = "IPI趨勢", Icon = PackIconKind.ChartLine, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                     new NavigationItem { Title = "FIR趨勢", Icon = PackIconKind.ChartBellCurve, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                     new NavigationItem { Title = "設備生產紀錄", Icon = PackIconKind.ClipboardTextClockOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                     new NavigationItem { Title = "庫存查詢", Icon = PackIconKind.Warehouse, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                     new NavigationItem { Title = "刀具使用紀錄", Icon = PackIconKind.SawBlade, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                }
+            },
+
+             // 群組節點：系統設定
+            new NavigationItem
+            {
+                Title = "系統設定",
+                Icon = PackIconKind.Cogs,
+                RequiredLevel = 0,
+                TargetViewModelType = null,
+                SubItems =
+                {
+                    new NavigationItem { Title = "工單建立", Icon = PackIconKind.FileDocumentPlusOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    new NavigationItem { Title = "參數設定", Icon = PackIconKind.CogBox, RequiredLevel = 0, TargetViewModelType = typeof(VM_System_SetDetail) },
+                    new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 3, TargetViewModelType = typeof(VM_UserControl_temp) },
+                     new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    //  new NavigationItem
+                    //{
+                    //    Title = "系統設定XXXX",
+                    //    Icon = PackIconKind.Cogs,
+                    //    RequiredLevel = 0,
+                    //    TargetViewModelType = null,
+                    //    SubItems =
+                    //    {
+                    //        new NavigationItem { Title = "工單建立", Icon = PackIconKind.FileDocumentPlusOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    //        new NavigationItem { Title = "參數設定", Icon = PackIconKind.TuneVariant, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    //        new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 3, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    //         new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    //    }
+                    //}
+                }
+            },
+
+             // 本機設定
+             new NavigationItem { Title = "本機設定", Icon = PackIconKind.MonitorEdit, RequiredLevel = 0, TargetViewModelType = typeof(MVVM_SystemConfig) }
+            };
+
+        /// <summary>
+        /// 重新依據權限生成菜單
+        /// </summary>
+        /// <param name="userLevel"></param>
+        private void GenerateMenu(int userLevel)
+        {
+
+            MenuItems.Clear();
+
+            // 將完整菜單丟進過濾器，把符合權限的菜單加進畫面上
+            foreach (var item in FilterMenus(_allSystemMenus, userLevel))
+            {
+                MenuItems.Add(item);
+            }
+        }
+
+        // ==========================================
+        // 核心過濾引擎 (遞迴處理 Recursion)
+        // ==========================================
+        private IEnumerable<NavigationItem> FilterMenus(IEnumerable<NavigationItem> sourceMenus, int userLevel)
+        {
+            foreach (var item in sourceMenus)
+            {
+                // 條件一：如果這項功能的權限要求高於使用者，直接剪掉 (剔除)
+                if (item.RequiredLevel > userLevel)
+                    continue;
+
+                // 必須建立一個「複本 (Clone)」，否則我們會破壞原本的 _allSystemMenus 結構
+                var clonedItem = new NavigationItem
+                {
+                    Title = item.Title,
+                    Icon = item.Icon,
+                    RequiredLevel = item.RequiredLevel,
+                    TargetViewModelType = item.TargetViewModelType
+                };
+
+                // 如果這個節點有子選單，就「遞迴」去過濾它的子選單
+                if (item.SubItems != null && item.SubItems.Any())
+                {
+                    foreach (var subItem in FilterMenus(item.SubItems, userLevel))
+                    {
+                        clonedItem.SubItems.Add(subItem);
+                    }
+
+                    // 防呆 UX：
+                    // 如果它是一個「純資料夾 (TargetViewModelType == null)」，而且過濾完之後，
+                    // 發現底下的子選單全部都被權限擋住了 (SubItems 是空的)，
+                    // 那這個空的空資料夾就不要顯示出來，避免干擾使用者！
+                    if (clonedItem.TargetViewModelType == null && !clonedItem.SubItems.Any())
+                    {
+                        continue;
+                    }
+                }
+
+                yield return clonedItem;
+            }
+
+        }
+
+        
         /// <summary>
         /// 處理導覽切換的核心邏輯
         /// </summary>
@@ -164,41 +514,74 @@ namespace WpfApp1.ViewModels
             {
                 // 請 DI 容器幫我們生出對應的 ViewModel，並塞給 CurrentView
                 CurrentView = _serviceProvider.GetService(targetType);
+
+                // 🌟 切換畫面後，自動把側邊抽屜收起來 (UX 體驗優化)
+                IsMenuOpen = false;
             }
         }
 
+        #endregion
+
+        #region "登入登出邏輯"
 
         [RelayCommand]
-        private async Task Login()
+        private async Task ToggleLoginState()
         {
-            // 1. 從 DI 容器拿到由系統組裝好 ApiService 的 LoginViewModel
-            // (注意：你的 MVVM_MainWindow 建構子裡必須有 _serviceProvider 喔)
-            var loginVM = _serviceProvider.GetService(typeof(VM_Login));
-
-            // 2. 呼叫對話框並等待
-            var result = await DialogHost.Show(loginVM, "RootDialog");
-
-            // 3. 檢查回傳的結果，是不是我們剛剛傳過來的 LoginResponseModel？
-            if (result is LoginResponseModel loginData)
+            // 【情境 A：使用者目前已登入，想要登出】
+            if (IsLoggedIn)
             {
-                // 登入成功！把 API 給的真實名字和權限設定到畫面上
-                User_Name = loginData.UserName;
+                // 1. 彈出確認視窗 (防呆)
+                var confirmResult = await MaterialMessageBox.ShowAsync("確定要登出系統嗎？", "登出確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (confirmResult == MessageBoxResult.Yes)
+                {
+                    // 2. 清除登入者的資料
+                    User_Name = "NA";
+                    User_ID = "NA";
+                    //PhpConnectionStatus = "未連線";
 
-                // 這裡你可以依據 loginData.Level 做不同處理
-                // 例如：if (loginData.Level >= 5) { 開啟管理者權限 }
+                    // 3. 切換按鈕狀態與文字
+                    IsLoggedIn = false;
+                    LoginButtonText = "系統登入";
+                    LoginButtonIcon = PackIconKind.Login;
 
-                PhpConnectionStatus = "已連線 (已登入)";
+                    // 將權限降回 0 (訪客)，選單會自動把機台控制等高權限功能藏起來！
+                    GenerateMenu(0);
 
-                MessageBox.Show($"登入成功！\n歡迎回來，{loginData.UserName} (權限等級: {loginData.Level})", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // 安全防護：強制把畫面切換回首頁 (避免使用者登出後還停留在機台參數設定畫面)
+                    Navigate(typeof(UserControl1ViewModel));
+                }
             }
+            // 【情境 B：使用者未登入，想要登入】
             else
             {
-                // 使用者點了取消 (收到 null)，甚麼都不做
+                // 1. 透過 DI 產生登入卡片並彈出
+                var loginVM = _serviceProvider.GetService(typeof(VM_Login));
+                var result = await DialogHost.Show(loginVM, "RootDialog");
+
+                // 2. 判斷是否登入成功
+                if (result is LoginResponseModel loginData)
+                {
+                    // 更新使用者資訊
+                    User_ID = loginData.User_ID;
+                    User_Name = loginData.UserName;
+                    //PhpConnectionStatus = "已連線 (已登入)";
+
+                    // 3. 切換按鈕狀態與文字
+                    IsLoggedIn = true;
+                    LoginButtonText = "登出";
+                    LoginButtonIcon = PackIconKind.Logout;
+
+                    // 4. 重新依據權限生成菜單
+                    GenerateMenu(loginData.Level);
+
+                    //MessageBox.Show($"登入成功！\n歡迎回來，{loginData.UserName}", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
         }
 
-        #region "COM Port"
+        #endregion
 
+        #region "COM Port"
 
 
         /// <summary>
@@ -231,14 +614,16 @@ namespace WpfApp1.ViewModels
                 // 如果還在，乖乖還原它，畫面就會完美保持在使用者剛才選的那一項！
                 SelectedPort = currentSelectedBackup;
             }
-            else if (AvailablePorts.Count > 0)
-            {
-                // 如果原本選的 Port 已經被拔掉了（不存在了），才預設選第一個
-                SelectedPort = AvailablePorts[0];
-            }
+            //else if (AvailablePorts.Count > 0)
+            //{
+            //    // 如果原本選的 Port 已經被拔掉了（不存在了），才預設選第一個
+            //    SelectedPort = AvailablePorts[0];
+            //}
             else
             {
-                SelectedPort = "未設定";
+                //SelectedPort = "未設定";
+                // 保留原字串，讓程式確切知道「哪個 Port 未連接」
+                SelectedPort = currentSelectedBackup;
             }
         }
         [RelayCommand]
@@ -262,9 +647,10 @@ namespace WpfApp1.ViewModels
 
         private void ExecuteConnect(string portName)
         {
-            if (string.IsNullOrEmpty(portName))
+            // 防呆：如果是空值或是我們自定義的異常字串，就不要浪費資源去嘗試開啟 Port
+            if (string.IsNullOrEmpty(portName) || portName == "未設定" || portName == "未連接")
             {
-                ScannerStatus = "未設定 COM 埠";
+                ScannerStatus = "未設定/未連接";
                 ConnectionState = ScannerConnectionState.NotSet;
                 return;
             }
@@ -277,18 +663,19 @@ namespace WpfApp1.ViewModels
                 // 顯示連接的 ComPort 與 狀態
                 ScannerStatus = $"{portName} (已連線)";
                 ConnectionState = ScannerConnectionState.Connected;
+
+
+                _snackbarService.ShowSnackbar($"條碼槍 {portName} 已成功連線", SnackbarMessageType.Success);
             }
             else
             {
                 ScannerStatus = $"{portName} (連線失敗)";
                 ConnectionState = ScannerConnectionState.Failed;
 
-                //連線失敗彈出訊息提示
-                MessageBox.Show(
-                    $"無法開啟 {portName}！\n請檢查：\n1. 條碼槍 USB 是否鬆脫？\n2. 該 COM 埠是否被其他軟體（如 SecureCRT）佔用？",
-                    "條碼槍硬體連線錯誤",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                _snackbarService.ShowSnackbar($"無法開啟 {portName}！請檢查線路是否鬆脫或被其他軟體佔用。",
+                            SnackbarMessageType.Error,
+                            "重試", () => Reconnect()
+                );
             }
         }
         #endregion 

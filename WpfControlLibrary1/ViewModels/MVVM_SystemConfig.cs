@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Notifications.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using WpfControlLibrary1.Services;
 
 
 namespace WpfControlLibrary1.ViewModels
@@ -18,6 +20,7 @@ namespace WpfControlLibrary1.ViewModels
     {
         private readonly IMessenger _messenger;
         private readonly SystemConfig _config;
+        private readonly ISnackbarService _snackbarService;
 
         // 畫面上用於繫結/修改的屬性
         [ObservableProperty]
@@ -30,14 +33,23 @@ namespace WpfControlLibrary1.ViewModels
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
 
 
-        public MVVM_SystemConfig(IMessenger messenger, SystemConfig config)
+        public ObservableCollection<string> PriorityKeywords { get; set; }
+
+        [ObservableProperty]
+        private string _newKeywordInput;
+
+
+        public MVVM_SystemConfig(IMessenger messenger, SystemConfig config, ISnackbarService snackbarService)
         {
             _messenger = messenger;
             _config = config;
-
+            _snackbarService = snackbarService;
             // 載入當前系統運作中的設定值
             PhpServerUrl = _config.PhpServerUrl;
             BarcodeComPort = _config.BarcodeComPort;
+
+            // 初始化關鍵字清單
+            PriorityKeywords = new ObservableCollection<string>(_config.DepartmentPriorityKeywords ?? new List<string>());
 
             // 讀取當前電腦實體可用串口，供現場工程師下拉選取
             foreach (string port in SerialPort.GetPortNames())
@@ -82,35 +94,56 @@ namespace WpfControlLibrary1.ViewModels
                 BarcodeComPort = currentSelectedBackup;
             }
         }
-        /// <summary>
-        /// 🌟 儲存按鈕觸發的命令
-        /// </summary>
+
         [RelayCommand]
-        private void SaveConfig()
+        private void AddKeyword()
+        {
+            if (string.IsNullOrWhiteSpace(NewKeywordInput)) return;
+
+            string cleaned = NewKeywordInput.Trim();
+            if (!PriorityKeywords.Contains(cleaned))
+            {
+                PriorityKeywords.Add(cleaned);
+                NewKeywordInput = string.Empty; // 清空輸入框
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveKeyword(string keyword)
+        {
+            if (PriorityKeywords.Contains(keyword))
+            {
+                PriorityKeywords.Remove(keyword);
+            }
+        }
+
+        // 儲存按鈕觸發的命令
+        [RelayCommand]
+        private async Task SaveConfig()
         {
             try
             {
-                // 1. 將畫面的新設定，同步回記憶體中的全域單例
                 _config.PhpServerUrl = PhpServerUrl;
                 _config.BarcodeComPort = BarcodeComPort;
 
-                // 2. 計算 XML 實體路徑
+                // 將畫面上的關鍵字同步回設定檔單例
+                _config.DepartmentPriorityKeywords = PriorityKeywords.ToList();
+
                 string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SystemConfig.xml");
-                //WeakReferenceMessenger.Default.Send(new SystemConfig_Change_Message());
-                _messenger.Send(new SystemConfig_Change_Message());
-                // 3. 呼叫你寫好的 C_XML 靜態類別存檔
                 C_XML.Save_XML_from_object(_config, configPath);
 
-                MessageBox.Show(
-                    "設定檔已成功儲存！\n\n提示：伺服器網址變更將於下次開啟程式時生效；條碼槍 COM 埠變更可至主畫面右上角點擊「重新連線」直接載入新埠。",
-                    "系統提示",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                _messenger.Send(new SystemConfig_Change_Message());
+                _snackbarService.ShowSnackbar(
+                    "儲存成功！設定已更新並寫入本機設定檔。",
+                    SnackbarMessageType.Success);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"儲存設定檔失敗: {ex.Message}", "系統錯誤", MessageBoxButton.OK, MessageBoxImage.Error);
+                await MaterialMessageBox.ShowAsync($"儲存失敗: {ex.Message}", "錯誤");
             }
         }
+
+
+       
     }
 }

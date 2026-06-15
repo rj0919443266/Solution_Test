@@ -1,0 +1,372 @@
+﻿<UserControl x:Class="WpfControlLibrary1.UserControl_LotDetail_IPI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:WpfControlLibrary1"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="600"
+             d:DesignWidth="900">
+
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1.5*" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="3*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="{DynamicResource MaterialDesignCardBackground}"
+                    CornerRadius="8"
+                    Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="IPI 檢驗紀錄"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource MaterialDesignBody}"
+                               Opacity="0.7"
+                               Margin="8,0,0,12" />
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding IpiRecords}"
+                              SelectedItem="{Binding SelectedIpiRecord}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              FontSize="18"
+                              Style="{StaticResource MaterialDesignDataGrid}">
+                        <DataGrid.Columns>
+
+                            <DataGridTextColumn Header="檢驗時間"
+                                                Binding="{Binding CTime}"
+                                                Width="Auto" />
+
+                            <DataGridTemplateColumn Header="測量判定"
+                                                    Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="CheckCircle"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     Foreground="#66BB6A"
+                                                                     ToolTip="數值正常">
+                                                <materialDesign:PackIcon.Style>
+                                                    <Style TargetType="materialDesign:PackIcon">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding JudgeMeasurement}"
+                                                                         Value="0">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </materialDesign:PackIcon.Style>
+                                            </materialDesign:PackIcon>
+
+                                            <materialDesign:PackIcon Kind="AlertCircle"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     Foreground="#EF5350"
+                                                                     ToolTip="有測量資料超出範圍">
+                                                <materialDesign:PackIcon.Style>
+                                                    <Style TargetType="materialDesign:PackIcon">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding JudgeMeasurement}"
+                                                                         Value="1">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </materialDesign:PackIcon.Style>
+                                            </materialDesign:PackIcon>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="完整度"
+                                                    Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="FileDocumentCheck"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     Foreground="#66BB6A"
+                                                                     ToolTip="無漏填">
+                                                <materialDesign:PackIcon.Style>
+                                                    <Style TargetType="materialDesign:PackIcon">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding JudgeMissingData}"
+                                                                         Value="0">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </materialDesign:PackIcon.Style>
+                                            </materialDesign:PackIcon>
+
+                                            <materialDesign:PackIcon Kind="FileDocumentRemove"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     Foreground="#FFD54F"
+                                                                     ToolTip="有資料漏填">
+                                                <materialDesign:PackIcon.Style>
+                                                    <Style TargetType="materialDesign:PackIcon">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding JudgeMissingData}"
+                                                                         Value="1">
+                                                                <Setter Property="Visibility"
+                                                                        Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </materialDesign:PackIcon.Style>
+                                            </materialDesign:PackIcon>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="站點狀態"
+                                                    Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="4"
+                                                Padding="8,2">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background"
+                                                            Value="#3366BB6A" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding JudgeEndWork}"
+                                                                     Value="0">
+                                                            <Setter Property="Background"
+                                                                    Value="#33BDBDBD" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontWeight="Bold"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text"
+                                                                Value="已完工" />
+                                                        <Setter Property="Foreground"
+                                                                Value="#66BB6A" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding JudgeEndWork}"
+                                                                         Value="0">
+                                                                <Setter Property="Text"
+                                                                        Value="未完工" />
+                                                                <Setter Property="Foreground"
+                                                                        Value="#BDBDBD" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="最大真圓度"
+                                                Binding="{Binding MaxRoundness}"
+                                                Width="Auto" />
+                            <DataGridTextColumn Header="備註"
+                                                Binding="{Binding Remarks}"
+                                                Width="*" />
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2"
+                    Background="{DynamicResource MaterialDesignCardBackground}"
+                    CornerRadius="8"
+                    Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal"
+                                Margin="8,0,0,12">
+                        <TextBlock Text="量測數據明細 - "
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.7" />
+                        <TextBlock Text="{Binding SelectedIpiRecord.CTime}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                   Opacity="0.7" />
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding SelectedIpiDataDetails}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              FontSize="18"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="All"
+                              Style="{StaticResource MaterialDesignDataGrid}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="工站名稱"
+                                                Binding="{Binding StationName}"
+                                                Width="Auto" />
+                            <DataGridTextColumn Header="量測目標"
+                                                Binding="{Binding TargetName}"
+                                                Width="Auto"
+                                                FontWeight="SemiBold" />
+
+                            <DataGridTextColumn Header="標準值"
+                                                Binding="{Binding NominalValue}"
+                                                Width="Auto"
+                                                Foreground="Gray" />
+                            <DataGridTextColumn Header="下限"
+                                                Binding="{Binding LowerLimit}"
+                                                Width="Auto"
+                                                Foreground="Gray" />
+                            <DataGridTextColumn Header="上限"
+                                                Binding="{Binding UpperLimit}"
+                                                Width="Auto"
+                                                Foreground="Gray" />
+
+                            <DataGridTextColumn Header="實際量測值"
+                                                Binding="{Binding ActualMeasurement}"
+                                                Width="Auto">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell"
+                                           BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding StatusLevel}"
+                                                         Value="Alarm">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#EF5350"
+                                                                         Opacity="0.7" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Setter Property="FontWeight"
+                                                        Value="Bold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="真圓度"
+                                                Binding="{Binding ActualRoundness}"
+                                                Width="Auto" />
+
+                            <DataGridTextColumn Header="檢驗員"
+                                                Binding="{Binding OperatorName}"
+                                                Width="Auto" />
+
+                            <DataGridTextColumn Header="狀態判定"
+                                                Binding="{Binding Note}"
+                                                Width="*">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell"
+                                           BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding StatusLevel}"
+                                                         Value="Unknown">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#BDBDBD"
+                                                                         Opacity="0.3" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Setter Property="Foreground"
+                                                        Value="Gray" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding StatusLevel}"
+                                                         Value="Alarm">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#EF5350"
+                                                                         Opacity="0.7" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Setter Property="FontWeight"
+                                                        Value="Bold" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding StatusLevel}"
+                                                         Value="Normal">
+                                                <Setter Property="Foreground"
+                                                        Value="#66BB6A" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Visibility="{Binding HasNoData, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Background="{DynamicResource MaterialDesignPaper}"
+                    Opacity="0.85" />
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="DatabaseRemoveOutline"
+                                         Width="80"
+                                         Height="80"
+                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                         Opacity="0.4"
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,16" />
+                <TextBlock Text="目前無 IPI 檢驗紀錄"
+                           FontSize="25"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.7"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="此工單尚未產生 IPI 資料"
+                           FontSize="18"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.5"
+                           Margin="0,8,0,0"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <Border Background="#80000000"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                         Value="0"
+                         IsIndeterminate="True"
+                         Width="60"
+                         Height="60" />
+        </Border>
+    </Grid>
+</UserControl>

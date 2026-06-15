@@ -1,69 +1,152 @@
 ﻿<UserControl x:Class="WpfControlLibrary1.UserControl_SystemComfig"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:WpfControlLibrary1"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="30">
-        <StackPanel MaxWidth="550"
+             mc:Ignorable="d"
+             Height="669"
+             Width="843">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32"
+                    MaxWidth="700"
                     HorizontalAlignment="Left">
 
-            <TextBlock Text="系統參數參數設定"
-                       FontSize="22"
-                       FontWeight="Bold"
-                       Margin="0,0,0,24"
-                       Foreground="{DynamicResource MaterialDesignPrimaryBrush}" />
-
-            <TextBlock Text="PHP Server API 遠端網址"
-                       FontSize="14"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,8"
-                       Foreground="{DynamicResource MaterialDesignBody}" />
-            <TextBox Text="{Binding PhpServerUrl, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource MaterialDesignFilledTextBox}"
-                     materialDesign:HintAssist.Hint="例如: 192.168.1.100"
-                     Margin="0,0,0,24" />
-
-            <TextBlock Text="預設條碼槍 COM 埠 (開機時自動連線目標)"
-                       FontSize="14"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,8"
-                       Foreground="{DynamicResource MaterialDesignBody}" />
-            <ComboBox ItemsSource="{Binding AvailablePorts}"
-                      SelectedItem="{Binding BarcodeComPort}"
-                      Style="{StaticResource MaterialDesignFilledComboBox}"
-                      Margin="0,0,0,32">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="DropDownOpened">
-                        <b:InvokeCommandAction Command="{Binding RefreshAvailablePortsCommand}" />
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-            </ComboBox>
-
-            <Separator Background="{DynamicResource MaterialDesignDivider}"
+            <TextBlock Text="系統參數與偏好設定"
+                       Style="{StaticResource MaterialDesignHeadline4TextBlock}"
                        Margin="0,0,0,24" />
+
+            <materialDesign:Card Padding="24"
+                                 Margin="0,0,0,24"
+                                 materialDesign:ElevationAssist.Elevation="Dp2">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,0,0,16">
+                        <materialDesign:PackIcon Kind="ServerNetwork"
+                                                 Width="24"
+                                                 Height="24"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,12,0"
+                                                 Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                        <TextBlock Text="網路與硬體通訊"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+                    </StackPanel>
+
+                    <TextBox Text="{Binding PhpServerUrl, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="伺服器網址 (例如:192.168.1.69)"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             Margin="0,0,0,20"
+                             FontSize="16" />
+
+                    <ComboBox ItemsSource="{Binding AvailablePorts}"
+                              SelectedItem="{Binding BarcodeComPort}"
+                              materialDesign:HintAssist.Hint="條碼槍序列埠 (COM Port)"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                              Height="48"
+                              FontSize="16">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="DropDownOpened">
+                                <b:InvokeCommandAction Command="{Binding RefreshAvailablePortsCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </ComboBox>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <materialDesign:Card Padding="24"
+                                 Margin="0,0,0,32"
+                                 materialDesign:ElevationAssist.Elevation="Dp2">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,0,0,8">
+                        <materialDesign:PackIcon Kind="SortVariant"
+                                                 Width="24"
+                                                 Height="24"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,12,0"
+                                                 Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                        <TextBlock Text="下拉選單優化"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+                    </StackPanel>
+
+                    <TextBlock Text="符合以下關鍵字的項目（如部門代號、課別）將自動排序至選單最上方。"
+                               Style="{StaticResource MaterialDesignBody2TextBlock}"
+                               Opacity="0.6"
+                               Margin="36,0,0,20" />
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding NewKeywordInput, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="輸入排序關鍵字 (例如: pd0001,生產,研發,RJ)"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 FontSize="16">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter"
+                                            Command="{Binding AddKeywordCommand}" />
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <Button Grid.Column="1"
+                                Command="{Binding AddKeywordCommand}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Margin="8,0,0,0"
+                                ToolTip="新增關鍵字">
+                            <materialDesign:PackIcon Kind="PlusCircle"
+                                                     Width="32"
+                                                     Height="32" />
+                        </Button>
+                    </Grid>
+
+                    <ListBox ItemsSource="{Binding PriorityKeywords}"
+                             Style="{StaticResource MaterialDesignFilterChipPrimaryListBox}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel IsItemsHost="True" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding}"
+                                               VerticalAlignment="Center"
+                                               Margin="4,0,8,0" />
+                                    <Button Command="{Binding DataContext.RemoveKeywordCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Width="20"
+                                            Height="20"
+                                            Padding="0">
+                                        <materialDesign:PackIcon Kind="CloseCircle"
+                                                                 Width="14"
+                                                                 Height="14" />
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </materialDesign:Card>
 
             <Button Command="{Binding SaveConfigCommand}"
                     Style="{StaticResource MaterialDesignRaisedButton}"
-                    Width="150"
-                    HorizontalAlignment="Left"
-                    Height="40">
+                    Height="50"
+                    Width="200"
+                    HorizontalAlignment="Right"
+                    materialDesign:ButtonAssist.CornerRadius="25">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="ContentSave"
-                                             Width="20"
-                                             Height="20"
-                                             VerticalAlignment="Center"
-                                             Margin="0,0,8,0" />
-                    <TextBlock Text="儲存設定"
-                               VerticalAlignment="Center"
-                               FontSize="14" />
+                                             Width="24"
+                                             Height="24"
+                                             Margin="0,0,12,0" />
+                    <TextBlock Text="儲存所有設定"
+                               FontSize="18"
+                               FontWeight="Bold" />
                 </StackPanel>
             </Button>
-
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>
