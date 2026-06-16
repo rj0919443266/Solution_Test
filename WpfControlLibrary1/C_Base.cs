@@ -29,6 +29,8 @@ namespace WpfControlLibrary1
         // 本機端專屬的優先排序關鍵字 (依照該機台所在部門/站別設定)
         // 如果選單項目的名稱包含這些字，就會自動被拉到下拉選單的最上面
         public List<string> DepartmentPriorityKeywords { get; set; } = new List<string> ();
+
+        public bool IsPrioritySortingEnabled { get; set; } = false;
     }
 
     public class SystemConfig_Change_Message

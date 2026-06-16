@@ -134,20 +134,21 @@ namespace WpfControlLibrary1.ViewModels
         {
             if (source == null) return new ObservableCollection<T>();
 
+            // 若設定檔中未開啟此功能，直接回傳原陣列順序，不執行置頂優化！
+            if (!_config.IsPrioritySortingEnabled)
+                return new ObservableCollection<T>(source);
+
             // 若設定檔沒有設定優先關鍵字，直接回傳原陣列
             if (_config.DepartmentPriorityKeywords == null || !_config.DepartmentPriorityKeywords.Any())
                 return new ObservableCollection<T>(source);
 
             var sortedList = source.OrderByDescending(item =>
             {
-                // 取得該項目的文字 (例如 BarCode + Definition)
                 string text = textSelector(item) ?? string.Empty;
-
-                // 判斷是否包含清單中的任何關鍵字 (回傳 true 會排在最前面)
                 return _config.DepartmentPriorityKeywords.Any(keyword =>
                     text.Contains(keyword, StringComparison.OrdinalIgnoreCase));
             })
-            .ThenBy(item => textSelector(item)) // 權重相同時，再依照原文字字母自然排序
+            .ThenBy(item => textSelector(item))
             .ToList();
 
             return new ObservableCollection<T>(sortedList);

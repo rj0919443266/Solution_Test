@@ -159,6 +159,10 @@
             <views:UserControl_WorkPageDataEdit />
         </DataTemplate>
         
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_FIR}">
+            <views:UserControl_FIR />
+        </DataTemplate>
+
         <DataTemplate DataType="{x:Type viewmodels_lib:VM_WipStatus}">
             <views:UserControl_WipStatus />
         </DataTemplate>

@@ -33,6 +33,8 @@ namespace WpfControlLibrary1.ViewModels
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
 
 
+        [ObservableProperty]
+        private bool _isPrioritySortingEnabled;
         public ObservableCollection<string> PriorityKeywords { get; set; }
 
         [ObservableProperty]
@@ -48,6 +50,7 @@ namespace WpfControlLibrary1.ViewModels
             PhpServerUrl = _config.PhpServerUrl;
             BarcodeComPort = _config.BarcodeComPort;
 
+            IsPrioritySortingEnabled = _config.IsPrioritySortingEnabled;
             // 初始化關鍵字清單
             PriorityKeywords = new ObservableCollection<string>(_config.DepartmentPriorityKeywords ?? new List<string>());
 
@@ -126,16 +129,15 @@ namespace WpfControlLibrary1.ViewModels
                 _config.PhpServerUrl = PhpServerUrl;
                 _config.BarcodeComPort = BarcodeComPort;
 
-                // 將畫面上的關鍵字同步回設定檔單例
+                // 3. 儲存時同步開關狀態回系統實體設定
+                _config.IsPrioritySortingEnabled = IsPrioritySortingEnabled;
                 _config.DepartmentPriorityKeywords = PriorityKeywords.ToList();
 
                 string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SystemConfig.xml");
                 C_XML.Save_XML_from_object(_config, configPath);
 
                 _messenger.Send(new SystemConfig_Change_Message());
-                _snackbarService.ShowSnackbar(
-                    "儲存成功！設定已更新並寫入本機設定檔。",
-                    SnackbarMessageType.Success);
+                _snackbarService.ShowSnackbar("儲存成功！設定已更新並寫入本機設定檔。", SnackbarMessageType.Success);
             }
             catch (Exception ex)
             {
@@ -144,6 +146,6 @@ namespace WpfControlLibrary1.ViewModels
         }
 
 
-       
+
     }
 }

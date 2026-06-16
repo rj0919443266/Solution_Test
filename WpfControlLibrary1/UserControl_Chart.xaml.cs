@@ -71,6 +71,10 @@ namespace WpfControlLibrary1
                 newAxis.MaxLimit = null;                  // 右側空間釋放，自動適應寬度
             }
 
+            // 🌟 補上這兩行：將最大最小值複製過去，確保新視窗的 Y 軸完美縮放展開！
+            newAxis.MinLimit = originalAxis.MinLimit;
+            newAxis.MaxLimit = originalAxis.MaxLimit;
+
             return newAxis;
         }
 
@@ -251,6 +255,8 @@ namespace WpfControlLibrary1
                 YAxes = standaloneYAxes,
                 Margin = new Thickness(16)
             };
+
+            interactiveChart.ChartDoubleClickCommand = this.ChartDoubleClickCommand;// 將原本綁定好的雙擊指令，複製給新視窗的圖表！
 
             // 4. 隱藏新視窗中的「開新視窗」選項與分隔線
             if (interactiveChart.MenuItem_OpenNewWindow != null)

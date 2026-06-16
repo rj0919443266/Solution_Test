@@ -383,10 +383,10 @@ namespace WpfApp1.ViewModels
         private readonly List<NavigationItem> _allSystemMenus = new()
         {
             // 首頁與總覽
-            new NavigationItem { Title = "Home", Icon = PackIconKind.Home, RequiredLevel = 0, TargetViewModelType = typeof(UserControl1ViewModel) },
+            //new NavigationItem { Title = "Home", Icon = PackIconKind.Home, RequiredLevel = 0, TargetViewModelType = typeof(UserControl1ViewModel) },
             new NavigationItem {Title = "工單 資訊輸入",Icon = PackIconKind.FileDocumentEditOutline,TargetViewModelType = typeof(VM_WorkPageDataEdit)},
             new NavigationItem { Title = "IPI ", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
-            new NavigationItem { Title = "FIR", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+            new NavigationItem { Title = "FIR", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_FIR) },
             new NavigationItem { Title = "品質異常單", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
             new NavigationItem { Title = "設備及時狀態", Icon = PackIconKind.MonitorDashboard, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
     
@@ -548,7 +548,8 @@ namespace WpfApp1.ViewModels
                     GenerateMenu(0);
 
                     // 安全防護：強制把畫面切換回首頁 (避免使用者登出後還停留在機台參數設定畫面)
-                    Navigate(typeof(UserControl1ViewModel));
+                    //Navigate(typeof(UserControl1ViewModel));
+                    Navigate(typeof(VM_WorkPageDataEdit));
                 }
             }
             // 【情境 B：使用者未登入，想要登入】

@@ -6,14 +6,14 @@
              x:Name="Root">
 
     <Grid>
+        <!--TooltipPosition="Auto"-->
         <lvc:CartesianChart x:Name="GanttChartControl"
                             Background="Transparent"
                             Series="{Binding Series, ElementName=Root}"
                             XAxes="{Binding XAxes, ElementName=Root}"
                             YAxes="{Binding YAxes, ElementName=Root}"
-                            TooltipPosition="Auto"
-                           
-                            
+                            TooltipPosition="Right"
+                            FindingStrategy="CompareOnlyX"
                             ZoomMode="Both"
                             MouseWheel="Chart_MouseWheel"
                             PreviewMouseRightButtonUp="Chart_PreviewMouseRightButtonUp"

@@ -1,0 +1,400 @@
+﻿<UserControl x:Class="WpfControlLibrary1.UserControl_FIR"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:WpfControlLibrary1"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="850"
+             d:DesignWidth="1200"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignPaper}"
+             FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <materialDesign:Card Grid.Row="0"
+                             Margin="0,0,0,16"
+                             Padding="16"
+                             materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <WrapPanel Grid.Row="0"
+                           Orientation="Horizontal"
+                           Margin="0,0,0,8">
+                    <ComboBox IsEditable="True"
+                              Text="{Binding SearchProductName, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding ProductNameList}"
+                              materialDesign:HintAssist.Hint="產品名稱 (必填)"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                              Width="200"
+                              Margin="0,0,16,16"
+                              FontSize="16"
+                              FontWeight="SemiBold" />
+                    <ComboBox IsEditable="True"
+                              Text="{Binding SearchWorkStation, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding WorkStationList}"
+                              DisplayMemberPath="Definition"
+                              SelectedValuePath="Definition"
+                              materialDesign:HintAssist.Hint="限定工序 (可空白)"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                              Width="200"
+                              Margin="0,0,16,16"
+                              FontSize="16" />
+                    <ComboBox IsEditable="True"
+                              Text="{Binding SearchEqNo, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding EqNoList}"
+                              DisplayMemberPath="Definition"
+                              SelectedValuePath="Definition"
+                              materialDesign:HintAssist.Hint="限定機台 (可空白)"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                              Width="200"
+                              Margin="0,0,16,16"
+                              FontSize="16" />
+                </WrapPanel>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <WrapPanel Grid.Column="0"
+                               Orientation="Horizontal"
+                               VerticalAlignment="Center">
+                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="12,4"
+                                Margin="0,0,16,8">
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <RadioButton Content="最新筆數"
+                                             IsChecked="{Binding IsSearchByLimit}"
+                                             Margin="0,0,12,0"
+                                             FontSize="15"
+                                             VerticalAlignment="Center" />
+                                <TextBox Text="{Binding SearchLimit, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding IsSearchByLimit}"
+                                         materialDesign:HintAssist.Hint="筆數"
+                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                         Width="80"
+                                         FontSize="16"
+                                         VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="12,4"
+                                Margin="0,0,16,8">
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <RadioButton Content="時間區段"
+                                             IsChecked="{Binding IsSearchByDate}"
+                                             Margin="0,0,12,0"
+                                             FontSize="15"
+                                             VerticalAlignment="Center" />
+                                <DatePicker SelectedDate="{Binding SearchStartDate}"
+                                            IsEnabled="{Binding IsSearchByDate}"
+                                            materialDesign:HintAssist.Hint="開始日期"
+                                            Style="{StaticResource MaterialDesignFloatingHintDatePicker}"
+                                            Width="130"
+                                            Margin="0,0,12,0"
+                                            FontSize="16"
+                                            VerticalAlignment="Center" />
+                                <TextBlock Text="至"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,12,0"
+                                           FontSize="16"
+                                           Opacity="0.6" />
+                                <DatePicker SelectedDate="{Binding SearchEndDate}"
+                                            IsEnabled="{Binding IsSearchByDate}"
+                                            materialDesign:HintAssist.Hint="結束日期"
+                                            Style="{StaticResource MaterialDesignFloatingHintDatePicker}"
+                                            Width="130"
+                                            FontSize="16"
+                                            VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+
+                    <Button Grid.Column="1"
+                            Command="{Binding SearchDataCommand}"
+                            VerticalAlignment="Center"
+                            Margin="16,0,0,8"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Height="48"
+                            Width="140"
+                            materialDesign:ButtonAssist.CornerRadius="24">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ChartLine"
+                                                     Width="22"
+                                                     Height="22"
+                                                     Margin="0,0,8,0" />
+                            <TextBlock Text="查詢分析"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </materialDesign:Card>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="550" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Margin="0,0,16,0"
+                    Background="{DynamicResource MaterialDesignCardBackground}"
+                    CornerRadius="8"
+                    Padding="16"
+                    materialDesign:ElevationAssist.Elevation="Dp1">
+                <DataGrid ItemsSource="{Binding FirDataList}"
+                          FontSize="16"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          Style="{StaticResource MaterialDesignDataGrid}"
+                          VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="檢驗結果"
+                                                Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal"
+                                                VerticalAlignment="Center"
+                                                Margin="4,0">
+                                        <TextBlock Text="["
+                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                   Opacity="0.5"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,4,0" />
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,8,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Opacity"
+                                                            Value="1" />
+                                                    <Setter Property="TextElement.Foreground"
+                                                            Value="#EF5350" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding AlarmCount}"
+                                                                     Value="0">
+                                                            <Setter Property="Opacity"
+                                                                    Value="0.3" />
+                                                            <Setter Property="TextElement.Foreground"
+                                                                    Value="{DynamicResource MaterialDesignBody}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <materialDesign:PackIcon Kind="AlarmLight"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     VerticalAlignment="Center" />
+                                            <TextBlock Text=":"
+                                                       VerticalAlignment="Center"
+                                                       Margin="2,0" />
+                                            <TextBlock Text="{Binding AlarmCount}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,8,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Opacity"
+                                                            Value="1" />
+                                                    <Setter Property="TextElement.Foreground"
+                                                            Value="#FFD54F" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding WarningCount}"
+                                                                     Value="0">
+                                                            <Setter Property="Opacity"
+                                                                    Value="0.3" />
+                                                            <Setter Property="TextElement.Foreground"
+                                                                    Value="{DynamicResource MaterialDesignBody}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <materialDesign:PackIcon Kind="AlertOutline"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     VerticalAlignment="Center" />
+                                            <TextBlock Text=":"
+                                                       VerticalAlignment="Center"
+                                                       Margin="2,0" />
+                                            <TextBlock Text="{Binding WarningCount}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="0,0,8,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Opacity"
+                                                            Value="1" />
+                                                    <Setter Property="TextElement.Foreground"
+                                                            Value="#66BB6A" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding NormalCount}"
+                                                                     Value="0">
+                                                            <Setter Property="Opacity"
+                                                                    Value="0.3" />
+                                                            <Setter Property="TextElement.Foreground"
+                                                                    Value="{DynamicResource MaterialDesignBody}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <materialDesign:PackIcon Kind="CheckCircleOutline"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     VerticalAlignment="Center" />
+                                            <TextBlock Text=":"
+                                                       VerticalAlignment="Center"
+                                                       Margin="2,0" />
+                                            <TextBlock Text="{Binding NormalCount}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Opacity"
+                                                            Value="1" />
+                                                    <Setter Property="TextElement.Foreground"
+                                                            Value="#BDBDBD" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding UnknownCount}"
+                                                                     Value="0">
+                                                            <Setter Property="Opacity"
+                                                                    Value="0.3" />
+                                                            <Setter Property="TextElement.Foreground"
+                                                                    Value="{DynamicResource MaterialDesignBody}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <materialDesign:PackIcon Kind="HelpCircleOutline"
+                                                                     Width="20"
+                                                                     Height="20"
+                                                                     VerticalAlignment="Center" />
+                                            <TextBlock Text=":"
+                                                       VerticalAlignment="Center"
+                                                       Margin="2,0" />
+                                            <TextBlock Text="{Binding UnknownCount}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="]"
+                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                   Opacity="0.5"
+                                                   VerticalAlignment="Center"
+                                                   Margin="4,0,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="批號 (Lot No)"
+                                            Binding="{Binding LotNo}"
+                                            Width="140" />
+                        <!--<DataGridTextColumn Header="測量時間"
+                                            Binding="{Binding CTime}"
+                                            Width="120" />
+                        <DataGridTextColumn Header="作業員"
+                                            Binding="{Binding User}"
+                                            Width="90" />-->
+
+                        <DataGridTemplateColumn Header="明細"
+                                                Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            ToolTip="查看明細"
+                                            Height="30"
+                                            Padding="8,0"
+                                            Command="{Binding DataContext.ShowDetailCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}">
+                                        <materialDesign:PackIcon Kind="FormatListText"
+                                                                 Width="18"
+                                                                 Height="18" />
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <ScrollViewer Grid.Column="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="0,0,8,0">
+                <ItemsControl ItemsSource="{Binding MeasurementCharts}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Margin="8"
+                                                 Height="350"
+                                                 HorizontalAlignment="Stretch"
+                                                 materialDesign:ElevationAssist.Elevation="Dp1">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0"
+                                               Text="{Binding ChartTitle}"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               Margin="16,12,16,4"
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}" />
+
+                                    <local:UserControl_Chart Grid.Row="1"
+                                                             Margin="8"
+                                                             Series="{Binding Series}"
+                                                             XAxes="{Binding XAxes}"
+                                                             YAxes="{Binding YAxes}"
+                                                             ChartDoubleClickCommand="{Binding DataContext.ChartDoubleClickedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

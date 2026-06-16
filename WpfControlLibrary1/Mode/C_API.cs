@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -198,6 +200,18 @@ namespace WpfControlLibrary1.Mode
 
         public string Note { get; set; } // 顯示文字 (如 Upper Alarm)
         public string StatusLevel { get; set; } // 用於 XAML 顏色判斷 (Normal, Warning, Alarm)
+    }
+
+
+    /// <summary>
+    /// 提供給 UserControl_Chart 綁定用的單一圖表容器
+    /// </summary>
+    public class ChartContainerModel
+    {
+        public string ChartTitle { get; set; }
+        public ISeries[] Series { get; set; }
+        public Axis[] XAxes { get; set; }
+        public Axis[] YAxes { get; set; }
     }
     #endregion
 

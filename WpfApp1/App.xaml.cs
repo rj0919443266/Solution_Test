@@ -79,10 +79,10 @@ namespace WpfApp1
             //================================= 呼叫視窗管理服務，讓它知道要用 WPF 的方式開視窗
             services.AddSingleton<IWindowManager, WpfWindowManager>(); 
             //=================================測試用
-            services.AddSingleton<UserControl1ViewModel>();
-            services.AddSingleton<UserControl2ViewModel>();
-            services.AddSingleton<UserControl3ViewModel>();
-            services.AddSingleton<VM_UserControl4>();
+            //services.AddSingleton<UserControl1ViewModel>();
+            //services.AddSingleton<UserControl2ViewModel>();
+            //services.AddSingleton<UserControl3ViewModel>();
+            //services.AddSingleton<VM_UserControl4>();
 
             //=================================
             services.AddSingleton<MVVM_SystemConfig>();
@@ -90,7 +90,8 @@ namespace WpfApp1
             services.AddTransient<VM_Login>();
             //=================================主頁面
             services.AddSingleton<VM_WorkPageDataEdit>(); // 
-
+            //=================================FIR
+            services.AddSingleton<VM_FIR>();
             //=================================過站資訊
             services.AddSingleton<VM_WipStatus>();
             //================================LotDetail
@@ -128,10 +129,11 @@ namespace WpfApp1
             //var scannerService = Services.GetRequiredService<WpfControlLibrary1.BarcodeScannerService>();
             //scannerService.Start();
 
-            Services.GetRequiredService<UserControl1ViewModel>();
-            Services.GetRequiredService<UserControl2ViewModel>();
-            Services.GetRequiredService<UserControl3ViewModel>();
-            Services.GetRequiredService<VM_UserControl4>();
+            //Services.GetRequiredService<UserControl1ViewModel>();
+            //Services.GetRequiredService<UserControl2ViewModel>();
+            //Services.GetRequiredService<UserControl3ViewModel>();
+            //Services.GetRequiredService<VM_UserControl4>();
+
             Services.GetRequiredService<VM_WipStatus>();
             Services.GetRequiredService<VM_System_SetDetail>();
 
