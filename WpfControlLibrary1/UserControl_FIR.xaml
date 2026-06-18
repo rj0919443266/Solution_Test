@@ -18,139 +18,193 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <materialDesign:Card Grid.Row="0"
-                             Margin="0,0,0,16"
-                             Padding="16"
-                             materialDesign:ElevationAssist.Elevation="Dp2">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        
 
-                <WrapPanel Grid.Row="0"
-                           Orientation="Horizontal"
-                           Margin="0,0,0,8">
-                    <ComboBox IsEditable="True"
-                              Text="{Binding SearchProductName, UpdateSourceTrigger=PropertyChanged}"
-                              ItemsSource="{Binding ProductNameList}"
-                              materialDesign:HintAssist.Hint="產品名稱 (必填)"
-                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                              Width="200"
-                              Margin="0,0,16,16"
-                              FontSize="16"
-                              FontWeight="SemiBold" />
-                    <ComboBox IsEditable="True"
-                              Text="{Binding SearchWorkStation, UpdateSourceTrigger=PropertyChanged}"
-                              ItemsSource="{Binding WorkStationList}"
-                              DisplayMemberPath="Definition"
-                              SelectedValuePath="Definition"
-                              materialDesign:HintAssist.Hint="限定工序 (可空白)"
-                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                              Width="200"
-                              Margin="0,0,16,16"
-                              FontSize="16" />
-                    <ComboBox IsEditable="True"
-                              Text="{Binding SearchEqNo, UpdateSourceTrigger=PropertyChanged}"
-                              ItemsSource="{Binding EqNoList}"
-                              DisplayMemberPath="Definition"
-                              SelectedValuePath="Definition"
-                              materialDesign:HintAssist.Hint="限定機台 (可空白)"
-                              Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                              Width="200"
-                              Margin="0,0,16,16"
-                              FontSize="16" />
-                </WrapPanel>
+        <Border Grid.Row="0"
+                Background="{DynamicResource MaterialDesignCardBackground}"
+                CornerRadius="8"
+                Margin="0,0,0,12">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10"
+                                  Opacity="0.1"
+                                  ShadowDepth="2" />
+            </Border.Effect>
 
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+            <WrapPanel Orientation="Horizontal"
+                       Margin="16"
+                       VerticalAlignment="Center">
 
-                    <WrapPanel Grid.Column="0"
-                               Orientation="Horizontal"
-                               VerticalAlignment="Center">
-                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="12,4"
-                                Margin="0,0,16,8">
-                            <StackPanel Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <RadioButton Content="最新筆數"
-                                             IsChecked="{Binding IsSearchByLimit}"
-                                             Margin="0,0,12,0"
-                                             FontSize="15"
-                                             VerticalAlignment="Center" />
-                                <TextBox Text="{Binding SearchLimit, UpdateSourceTrigger=PropertyChanged}"
-                                         IsEnabled="{Binding IsSearchByLimit}"
-                                         materialDesign:HintAssist.Hint="筆數"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         Width="80"
-                                         FontSize="16"
-                                         VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Border>
+                <materialDesign:PackIcon Kind="ChartBellCurve"
+                                         Width="24"
+                                         Height="24"
+                                         VerticalAlignment="Bottom"
+                                         Margin="0,0,8,12"
+                                         Foreground="{DynamicResource MaterialDesignBody}" />
+                <TextBlock Text="FIR趨勢"
+                           FontSize="25"
+                           FontWeight="Bold"
+                           VerticalAlignment="Bottom"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Margin="0,0,24,6" />
 
-                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                BorderThickness="1"
-                                CornerRadius="4"
-                                Padding="12,4"
-                                Margin="0,0,16,8">
-                            <StackPanel Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <RadioButton Content="時間區段"
-                                             IsChecked="{Binding IsSearchByDate}"
-                                             Margin="0,0,12,0"
-                                             FontSize="15"
-                                             VerticalAlignment="Center" />
-                                <DatePicker SelectedDate="{Binding SearchStartDate}"
-                                            IsEnabled="{Binding IsSearchByDate}"
-                                            materialDesign:HintAssist.Hint="開始日期"
-                                            Style="{StaticResource MaterialDesignFloatingHintDatePicker}"
-                                            Width="130"
-                                            Margin="0,0,12,0"
-                                            FontSize="16"
-                                            VerticalAlignment="Center" />
-                                <TextBlock Text="至"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,12,0"
-                                           FontSize="16"
-                                           Opacity="0.6" />
-                                <DatePicker SelectedDate="{Binding SearchEndDate}"
-                                            IsEnabled="{Binding IsSearchByDate}"
-                                            materialDesign:HintAssist.Hint="結束日期"
-                                            Style="{StaticResource MaterialDesignFloatingHintDatePicker}"
-                                            Width="130"
-                                            FontSize="16"
-                                            VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Border>
-                    </WrapPanel>
+                <ComboBox IsEditable="True"
+                          Text="{Binding SearchProductName, UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding ProductNameList}"
+                          materialDesign:HintAssist.Hint="產品名稱 (必填)"
+                          FontSize="18"
+                          Width="180"
+                          Margin="0,4,16,4"
+                          Padding="0,6,0,1"
+                          VerticalAlignment="Bottom"
+                          Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
 
-                    <Button Grid.Column="1"
-                            Command="{Binding SearchDataCommand}"
-                            VerticalAlignment="Center"
-                            Margin="16,0,0,8"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Height="48"
-                            Width="140"
-                            materialDesign:ButtonAssist.CornerRadius="24">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ChartLine"
-                                                     Width="22"
-                                                     Height="22"
-                                                     Margin="0,0,8,0" />
-                            <TextBlock Text="查詢分析"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       VerticalAlignment="Center" />
+                <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="16,8,4,4"
+                        Margin="0,4,16,0"
+                        VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Bottom">
+                        <ComboBox IsEditable="True"
+                                  Text="{Binding SearchWorkStation, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding WorkStationList}"
+                                  DisplayMemberPath="Definition"
+                                  SelectedValuePath="Definition"
+                                  materialDesign:HintAssist.Hint="限定工序 (可空白)"
+                                  FontSize="18"
+                                  Width="160"
+                                  Margin="0,0,16,0"
+                                  Padding="0,6,0,1"
+                                  VerticalAlignment="Bottom"
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+
+                        <ComboBox IsEditable="True"
+                                  Text="{Binding SearchEqNo, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding EqNoList}"
+                                  DisplayMemberPath="Definition"
+                                  SelectedValuePath="Definition"
+                                  materialDesign:HintAssist.Hint="限定機台 (可空白)"
+                                  FontSize="18"
+                                  Width="160"
+                                  Margin="0,0,16,0"
+                                  Padding="0,6,0,1"
+                                  VerticalAlignment="Bottom"
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,0,12,6"
+                                    VerticalAlignment="Bottom">
+                            <TextBlock Text="依過站時間排序"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,12,0"
+                                       Foreground="{DynamicResource MaterialDesignBody}" />
+                            <ToggleButton IsChecked="{Binding IsSortByWorkStationTime}"
+                                          ToolTip="啟用後，圖表與清單將嚴格依照此工序/機台的過站時間進行過濾與排序"
+                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                          VerticalAlignment="Center" />
                         </StackPanel>
-                    </Button>
-                </Grid>
-            </Grid>
-        </materialDesign:Card>
+                    </StackPanel>
+                </Border>
+
+                <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="16,8,4,4"
+                        Margin="0,4,16,0"
+                        VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Bottom">
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,0,16,0"
+                                    VerticalAlignment="Bottom">
+                            <RadioButton GroupName="SearchMode"
+                                         Content="最新"
+                                         IsChecked="{Binding IsSearchByLimit}"
+                                         Margin="0,0,8,6"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         VerticalAlignment="Bottom"
+                                         Style="{StaticResource MaterialDesignRadioButton}" />
+                            <TextBox Text="{Binding SearchLimit, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding IsSearchByLimit}"
+                                     materialDesign:HintAssist.Hint="筆數"
+                                     FontSize="18"
+                                     Width="60"
+                                     Margin="0,0,0,0"
+                                     Padding="0,6,0,1"
+                                     VerticalAlignment="Bottom"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                        </StackPanel>
+
+                        <Border Width="1"
+                                Background="{DynamicResource MaterialDesignDivider}"
+                                Margin="0,6,12,8"
+                                Opacity="0.4" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,0,12,0"
+                                    VerticalAlignment="Bottom">
+                            <RadioButton GroupName="SearchMode"
+                                         Content="區段"
+                                         IsChecked="{Binding IsSearchByDate}"
+                                         Margin="0,0,8,6"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         VerticalAlignment="Bottom"
+                                         Style="{StaticResource MaterialDesignRadioButton}" />
+                            <DatePicker SelectedDate="{Binding SearchStartDate}"
+                                        IsEnabled="{Binding IsSearchByDate}"
+                                        materialDesign:HintAssist.Hint="開始日期"
+                                        FontSize="18"
+                                        Width="135"
+                                        Margin="0,0,8,0"
+                                        Padding="0,5,0,0"
+                                        VerticalAlignment="Bottom"
+                                        Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                            <TextBlock Text="至"
+                                       FontSize="16"
+                                       Opacity="0.6"
+                                       Margin="0,0,8,6"
+                                       VerticalAlignment="Bottom" />
+                            <DatePicker SelectedDate="{Binding SearchEndDate}"
+                                        IsEnabled="{Binding IsSearchByDate}"
+                                        materialDesign:HintAssist.Hint="結束日期"
+                                        FontSize="18"
+                                        Width="135"
+                                        Margin="0,0,0,0"
+                                        Padding="0,5,0,0"
+                                        VerticalAlignment="Bottom"
+                                        Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Button Command="{Binding SearchDataCommand}"
+                        Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                        FontSize="20"
+                        Height="50"
+                        Padding="32,0"
+                        Margin="16,4,0,4"
+                        VerticalAlignment="Bottom"
+                        materialDesign:ButtonAssist.CornerRadius="24">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Magnify"
+                                                 Width="28"
+                                                 Height="28"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0" />
+                        <TextBlock Text="趨勢查詢"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+            </WrapPanel>
+        </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -324,16 +378,11 @@
 
                         <DataGridTextColumn Header="批號 (Lot No)"
                                             Binding="{Binding LotNo}"
-                                            Width="140" />
-                        <!--<DataGridTextColumn Header="測量時間"
-                                            Binding="{Binding CTime}"
-                                            Width="120" />
-                        <DataGridTextColumn Header="作業員"
-                                            Binding="{Binding User}"
-                                            Width="90" />-->
+                                            Width="Auto" />
+
 
                         <DataGridTemplateColumn Header="明細"
-                                                Width="80">
+                                                Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Style="{StaticResource MaterialDesignOutlinedButton}"
@@ -349,6 +398,14 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="測量時間"
+                                            Binding="{Binding CTime}"
+                                            Width="Auto" />
+
+                        <DataGridTextColumn Header="作業員"
+                                            Binding="{Binding User}"
+                                            Width="Auto" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -396,5 +453,42 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
+
+        <Grid Grid.Row="1"
+              Visibility="{Binding HasNoData, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Background="{DynamicResource MaterialDesignPaper}"
+                    CornerRadius="8"
+                    Opacity="0.9" />
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="DatabaseRemoveOutline"
+                                         Width="80"
+                                         Height="80"
+                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                         Opacity="0.4"
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,16" />
+                <TextBlock Text="目前無 查詢分析 資料"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Opacity="0.7"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Background="#80000000"
+                CornerRadius="8"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                         IsIndeterminate="True"
+                         Value="0"
+                         Width="60"
+                         Height="60" />
+        </Border>
+
     </Grid>
 </UserControl>
+

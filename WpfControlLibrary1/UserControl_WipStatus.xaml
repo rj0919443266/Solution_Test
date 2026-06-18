@@ -32,13 +32,13 @@
             <WrapPanel Orientation="Horizontal"
                        Margin="16"
                        VerticalAlignment="Center">
-                <materialDesign:PackIcon Kind="Magnify"
+                <materialDesign:PackIcon Kind="TransitConnection"
                                          Width="24"
                                          Height="24"
                                          VerticalAlignment="Bottom"
                                          Margin="0,0,8,12"
                                          Foreground="{DynamicResource MaterialDesignBody}" />
-                <TextBlock Text="過站明細查詢"
+                <TextBlock Text="過站狀態"
                            FontSize="25"
                            FontWeight="Bold"
                            VerticalAlignment="Bottom"
@@ -93,7 +93,8 @@
                         Height="50"
                         Padding="32,0"
                         Margin="16,4,0,4"
-                        VerticalAlignment="Bottom">
+                        VerticalAlignment="Bottom"
+                        materialDesign:ButtonAssist.CornerRadius="24">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Search"
                                                  Width="28"

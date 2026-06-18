@@ -386,7 +386,7 @@ namespace WpfApp1.ViewModels
             //new NavigationItem { Title = "Home", Icon = PackIconKind.Home, RequiredLevel = 0, TargetViewModelType = typeof(UserControl1ViewModel) },
             new NavigationItem {Title = "工單 資訊輸入",Icon = PackIconKind.FileDocumentEditOutline,TargetViewModelType = typeof(VM_WorkPageDataEdit)},
             new NavigationItem { Title = "IPI ", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
-            new NavigationItem { Title = "FIR", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_FIR) },
+            new NavigationItem { Title = "FIR", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
             new NavigationItem { Title = "品質異常單", Icon = PackIconKind.FileDocumentEditOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
             new NavigationItem { Title = "設備及時狀態", Icon = PackIconKind.MonitorDashboard, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
     
@@ -402,7 +402,7 @@ namespace WpfApp1.ViewModels
                 {
                      new NavigationItem { Title = "過站狀態", Icon = PackIconKind.TransitConnection, RequiredLevel = 0, TargetViewModelType = typeof(VM_WipStatus) },
                      new NavigationItem { Title = "IPI趨勢", Icon = PackIconKind.ChartLine, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
-                     new NavigationItem { Title = "FIR趨勢", Icon = PackIconKind.ChartBellCurve, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                     new NavigationItem { Title = "FIR趨勢", Icon = PackIconKind.ChartBellCurve, RequiredLevel = 0, TargetViewModelType = typeof(VM_FIR) },
                      new NavigationItem { Title = "設備生產紀錄", Icon = PackIconKind.ClipboardTextClockOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
                      new NavigationItem { Title = "庫存查詢", Icon = PackIconKind.Warehouse, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
                      new NavigationItem { Title = "刀具使用紀錄", Icon = PackIconKind.SawBlade, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },

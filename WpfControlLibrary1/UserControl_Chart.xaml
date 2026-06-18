@@ -13,7 +13,7 @@
                             XAxes="{Binding XAxes, ElementName=Root}"
                             YAxes="{Binding YAxes, ElementName=Root}"
                             TooltipPosition="Right"
-                            FindingStrategy="CompareOnlyX"
+                            FindingStrategy="CompareOnlyXTakeClosest"
                             ZoomMode="Both"
                             MouseWheel="Chart_MouseWheel"
                             PreviewMouseRightButtonUp="Chart_PreviewMouseRightButtonUp"

@@ -152,13 +152,15 @@ namespace WpfControlLibrary1.Services
         /// </summary>
         public async Task<ApiResult<string>> PingServerAsync()
         {
-            // 注意：Ping 不走共用引擎，因為它是直接讀取 txt 文字檔，沒有 JSON 格式。保留您的優化寫法！
             var result = new ApiResult<string>();
             try
             {
-                string url = $"http://{_config.PhpServerUrl.TrimEnd('/')}/WorkPage/ping.txt";
-                var request = new HttpRequestMessage(HttpMethod.Get, url);
-                var response = await _httpClient.SendAsync(request);
+                // 加入時間戳記 (Cache-Buster)，防止 HttpClient 讀取到本機的靜態檔案快取，確保每一次都是真實的網路探測
+                long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                string url = $"http://{_config.PhpServerUrl.TrimEnd('/')}/WorkPage/ping.txt?t={timestamp}";
+
+                // 既然只是簡單的 GET，可以直接使用 GetAsync 讓程式碼更簡潔
+                var response = await _httpClient.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
                 {

@@ -164,6 +164,8 @@ namespace WpfControlLibrary1.Mode
 
         public int NormalCount { get; set; }
         public int UnknownCount { get; set; }
+
+        public string ListWorkData { get; set; }
     }
 
     // 對應 Data 欄位解析出來的每一筆明細數值
