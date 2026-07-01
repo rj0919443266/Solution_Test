@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace WpfControlLibrary1.Mode
 {
@@ -75,6 +76,11 @@ namespace WpfControlLibrary1.Mode
         [JsonPropertyName("Level")]
         public int Level { get; set; }
     }
+
+    public interface IUserLevelReceiver
+    {
+        void ReceiveUserLevel(LoginResponseModel loginResponseModel);
+    }
     #endregion
     //=============================================
     #region "過站狀態"
@@ -133,7 +139,82 @@ namespace WpfControlLibrary1.Mode
         public bool delete { get; set; }
     }
 
+    #region "工單建檔 / 歷史紀錄相關"
 
+    // 用於顯示右側最新建立的 50 筆紀錄
+    public partial class WorkPageDataSummaryModel : ObservableObject
+    {
+        [ObservableProperty]
+        [property: JsonPropertyName("c_time")]
+        [property: JsonConverter(typeof(PhpDateTimeConverter))]
+        private DateTime? _cTime;
+
+        [ObservableProperty]
+        [property: JsonPropertyName("Lot_no")]
+        private string _lotNo;
+
+        [ObservableProperty]
+        [property: JsonPropertyName("Product_name")]
+        private string _productName;
+
+        [ObservableProperty]
+        [property: JsonPropertyName("Lot_no_Parenet")]
+        private string _lotNoParent;
+
+        [ObservableProperty]
+        [property: JsonPropertyName("Quantity")]
+        private int? _quantity;
+
+        [ObservableProperty]
+        [property: JsonPropertyName("create_user")]
+        private string _createUser;
+
+        [ObservableProperty]
+        [property: JsonPropertyName("b_delete")]
+        private int _bDelete; // 0 為正常, 1 為已刪除
+    }
+
+  
+    #endregion
+
+    #endregion
+
+    #region "工單建檔 / RCP 配方相關"
+
+    /// <summary>
+    /// 用於從 2023_04_27_17_56_56_590.rcp 讀取與寫入資料庫 JSON
+    /// XML 根節點對應 "Temp_work_station"
+    /// </summary>
+    [XmlType("Temp_work_station")]
+    public partial class TempWorkStationModel : ObservableObject
+    {
+        // NO 欄位在舊版 RCP XML 中沒有，但寫入資料庫的 JSON 需要，因此 XmlIgnore
+        [ObservableProperty]
+        [property: XmlIgnore]
+        [property: JsonPropertyName("NO")]
+        private int _no;
+
+        [ObservableProperty]
+        [property: XmlElement("Can_Pass")]
+        [property: JsonPropertyName("Can_Pass")]
+        private bool _can_Pass;
+
+        [ObservableProperty]
+        [property: XmlElement("work_station")]
+        [property: JsonPropertyName("work_station")]
+        private string _work_station;
+
+        // 深度複製，用於防呆或暫存
+        public TempWorkStationModel Clone()
+        {
+            return new TempWorkStationModel
+            {
+                No = this.No,
+                Can_Pass = this.Can_Pass,
+                Work_station = this.Work_station
+            };
+        }
+    }
     #endregion
     //=============================================FIR 資訊
     #region "FIR 資訊"

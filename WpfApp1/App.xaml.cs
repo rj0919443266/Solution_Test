@@ -12,6 +12,8 @@ using WpfControlLibrary1.Mode;
 using WpfControlLibrary1.Services;
 using WpfControlLibrary1.ViewModels;
 
+using AutoUpdaterDotNET;
+
 
 namespace WpfApp1
 {
@@ -24,6 +26,8 @@ namespace WpfApp1
         // 定義全域的 DI 容器
         public new static App Current => (App)Application.Current;
         public IServiceProvider Services { get; }
+
+        SystemConfig appConfig;
 
         public App()
         {
@@ -39,7 +43,7 @@ namespace WpfApp1
      
             //=================================設定檔
             string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SystemConfig.xml");
-            SystemConfig appConfig;
+           
 
             if (File.Exists(configPath))
             {
@@ -54,7 +58,7 @@ namespace WpfApp1
                 // 如果檔案不存在，建立預設值，並立刻存成 XML 檔案！(這對現場裝機非常友善)
                 appConfig = new SystemConfig();
 
-                // 🌟 修正：只有在電腦「第一次開程式、全新裝機」時，才塞入出廠預設值
+                // 只有在電腦「第一次開程式、全新裝機」時，才塞入出廠預設值
                 appConfig.DepartmentPriorityKeywords.Add("pd0001");
                 appConfig.DepartmentPriorityKeywords.Add("研發");
                 appConfig.DepartmentPriorityKeywords.Add("RJ");
@@ -90,8 +94,11 @@ namespace WpfApp1
             services.AddTransient<VM_Login>();
             //=================================主頁面
             services.AddSingleton<VM_WorkPageDataEdit>(); // 
+
             //=================================FIR
             services.AddSingleton<VM_FIR>();
+            //=================================工單建立
+            services.AddSingleton<VM_WorkPageDataCreate>();
             //=================================過站資訊
             services.AddSingleton<VM_WipStatus>();
             //================================LotDetail
@@ -124,6 +131,15 @@ namespace WpfApp1
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+#if !DEBUG
+            // 設定 XML 網址
+            //AutoUpdater.Start("http://"+appConfig.ServerUrl+"/WorkPage/updates/update.xml");
+            
+            // 選用：自訂檢查間隔或行為
+            //AutoUpdater.CheckForUpdateEvent += AutoUpdater_CheckForUpdateEvent;
+#endif
+
             //強制喚醒(Instantiate)
             //在畫面彈出前，先把條碼槍服務撈出來，並呼叫 Start() 打開通訊埠
             //var scannerService = Services.GetRequiredService<WpfControlLibrary1.BarcodeScannerService>();
@@ -141,6 +157,29 @@ namespace WpfApp1
             // 從 DI 容器拿到由系統完全注入好的 MainWindow 實例
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
+        }
+
+        private void AutoUpdater_CheckForUpdateEvent(UpdateInfoEventArgs args)
+        {
+            //if (args.IsUpdateAvailable)
+            //{
+            //    // 可以在此處加入自訂 UI 邏輯
+            //}
+
+            if (args.IsUpdateAvailable)
+            {
+                //MessageBox.Show("檢測到新版本: " + args.CurrentVersion);
+                AutoUpdater.ShowUpdateForm(args);
+            }
+            else if (args.Error != null)
+            {
+                // 如果這裡有東西，代表連線失敗或 XML 格式錯誤
+                MessageBox.Show("更新檢查失敗: " + args.Error.Message);
+            }
+            else
+            {
+                //MessageBox.Show("目前已是最新版本");
+            }
         }
 
         // 覆寫 OnExit，在程式關閉時安全釋放 COM Port

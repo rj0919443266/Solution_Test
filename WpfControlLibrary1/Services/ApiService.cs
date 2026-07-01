@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -120,7 +121,7 @@ namespace WpfControlLibrary1.Services
         /// </summary>
         public async Task<ApiResult<T>> PostAsync<T>(string resource, object payload)
         {
-            string url = $"http://{_config.PhpServerUrl.TrimEnd('/')}/WorkPage/index.php?resource={resource}";
+            string url = $"http://{_config.ServerUrl.TrimEnd('/')}/WorkPage/index.php?resource={resource}";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
 
             string jsonContent = JsonSerializer.Serialize(payload);
@@ -135,7 +136,7 @@ namespace WpfControlLibrary1.Services
         /// </summary>
         public async Task<ApiResult<T>> GetAsync<T>(string resource)
         {
-            string url = $"http://{_config.PhpServerUrl.TrimEnd('/')}/WorkPage/index.php?resource={resource}";
+            string url = $"http://{_config.ServerUrl.TrimEnd('/')}/WorkPage/index.php?resource={resource}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
 
             // 呼叫共用引擎
@@ -157,7 +158,7 @@ namespace WpfControlLibrary1.Services
             {
                 // 加入時間戳記 (Cache-Buster)，防止 HttpClient 讀取到本機的靜態檔案快取，確保每一次都是真實的網路探測
                 long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                string url = $"http://{_config.PhpServerUrl.TrimEnd('/')}/WorkPage/ping.txt?t={timestamp}";
+                string url = $"http://{_config.ServerUrl.TrimEnd('/')}/WorkPage/ping.txt?t={timestamp}";
 
                 // 既然只是簡單的 GET，可以直接使用 GetAsync 讓程式碼更簡潔
                 var response = await _httpClient.GetAsync(url);
@@ -232,5 +233,33 @@ namespace WpfControlLibrary1.Services
             return await GetAsync<List<string>>("product_names");
         }
         #endregion
+
+        #region "新增工單與紀錄查詢"
+
+        /// <summary>
+        /// 獲取最新建立的 50 筆工單資訊 (排除 b_delete = 1)
+        /// </summary>
+        public async Task<ApiResult<ObservableCollection<WorkPageDataSummaryModel>>> GetLatestWorkOrdersAsync()
+        {
+            return await PostAsync<ObservableCollection<WorkPageDataSummaryModel>>("get_latest_work_page_data", new { limit = 50 });
+        }
+
+        /// <summary>
+        /// 軟刪除工單 (更新 b_delete = 1, d_time = NOW(), delete_user = 當前使用者)
+        /// </summary>
+        public async Task<ApiResult<object>> SoftDeleteWorkOrderAsync(string lotNo, string productName, string deleteUser)
+        {
+            var payload = new
+            {
+                Lot_no = lotNo,
+                Product_name = productName,
+                delete_user = deleteUser
+            };
+            return await PostAsync<object>("delete_work_page_data", payload);
+        }
+
+        #endregion
+
+
     }
 }

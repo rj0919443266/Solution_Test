@@ -210,4 +210,7 @@ namespace WpfControlLibrary1.Services
         Disconnected  // 異常斷線
     }
 
+    //定義介面：負責接收使用者層級訊息的合約
+
+
 }

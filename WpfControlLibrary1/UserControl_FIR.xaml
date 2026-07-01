@@ -66,7 +66,7 @@
                         VerticalAlignment="Bottom">
                     <StackPanel Orientation="Horizontal"
                                 VerticalAlignment="Bottom">
-                        <ComboBox IsEditable="True"
+                        <!--<ComboBox IsEditable="True"
                                   Text="{Binding SearchWorkStation, UpdateSourceTrigger=PropertyChanged}"
                                   ItemsSource="{Binding WorkStationList}"
                                   DisplayMemberPath="Definition"
@@ -77,9 +77,44 @@
                                   Margin="0,0,16,0"
                                   Padding="0,6,0,1"
                                   VerticalAlignment="Bottom"
-                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
-
-                        <ComboBox IsEditable="True"
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" />-->
+                        <ComboBox ItemsSource="{Binding WorkStationList}"
+                                  SelectedValuePath="Definition"
+                                  SelectedValue="{Binding SearchWorkStation, UpdateSourceTrigger=PropertyChanged}"
+                                  materialDesign:HintAssist.Hint="限定工序 (可空白)"
+                                  materialDesign:HintAssist.FloatingScale="0.55"
+                                  materialDesign:TextFieldAssist.HasClearButton="True"
+                                  Foreground="{DynamicResource MaterialDesignBody}"
+                                  FontSize="18"
+                                  FontWeight="Bold"
+                                  Width="Auto"
+                                  Margin="0,0,16,0"
+                                  Padding="0,6,0,1"
+                                  VerticalAlignment="Bottom">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox"
+                                       BasedOn="{StaticResource MaterialDesignFloatingHintComboBox}">
+                                    <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush"
+                                            Value="Transparent" />
+                                </Style>
+                            </ComboBox.Style>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding BarCode}"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource MaterialDesignBody}" />
+                                        <TextBlock Text=" - "
+                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                   Opacity="0.7" />
+                                        <TextBlock Text="{Binding Definition}"
+                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                   Opacity="0.7" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <!--<ComboBox IsEditable="True"
                                   Text="{Binding SearchEqNo, UpdateSourceTrigger=PropertyChanged}"
                                   ItemsSource="{Binding EqNoList}"
                                   DisplayMemberPath="Definition"
@@ -90,7 +125,43 @@
                                   Margin="0,0,16,0"
                                   Padding="0,6,0,1"
                                   VerticalAlignment="Bottom"
-                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" />-->
+                        <ComboBox ItemsSource="{Binding EqNoList}"
+                                  SelectedValuePath="Definition"
+                                  SelectedValue="{Binding SearchEqNo, UpdateSourceTrigger=PropertyChanged}"
+                                  materialDesign:HintAssist.Hint="限定機台 (可空白)"
+                                  materialDesign:HintAssist.FloatingScale="0.55"
+                                  materialDesign:TextFieldAssist.HasClearButton="True"
+                                  Foreground="{DynamicResource MaterialDesignBody}"
+                                  FontSize="18"
+                                  FontWeight="Bold"
+                                  Width="Auto"
+                                  Margin="0,0,16,0"
+                                  Padding="0,6,0,1"
+                                  VerticalAlignment="Bottom">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox"
+                                       BasedOn="{StaticResource MaterialDesignFloatingHintComboBox}">
+                                    <Setter Property="materialDesign:TextFieldAssist.UnderlineBrush"
+                                            Value="Transparent" />
+                                </Style>
+                            </ComboBox.Style>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding BarCode}"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource MaterialDesignBody}" />
+                                        <TextBlock Text=" - "
+                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                   Opacity="0.7" />
+                                        <TextBlock Text="{Binding Definition}"
+                                                   Foreground="{DynamicResource MaterialDesignBody}"
+                                                   Opacity="0.7" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,0,12,6"

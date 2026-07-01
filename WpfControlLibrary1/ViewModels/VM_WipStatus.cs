@@ -131,7 +131,10 @@ namespace WpfControlLibrary1.ViewModels
         //    InitEmptyChartAxes();
         //}
 
-        // 從 API 非同步載入產品名稱列表，並更新 ProductNameList 屬性
+        /// <summary>
+        /// 從 API 非同步載入產品名稱列表，並更新 ProductNameList 屬性
+        /// </summary>
+        /// <returns></returns>
         private async Task LoadProductNamesAsync()
         {
             var result = await _apiService.GetProductNamesAsync();

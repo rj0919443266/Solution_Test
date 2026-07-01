@@ -1,0 +1,499 @@
+﻿<UserControl x:Class="WpfControlLibrary1.UserControl_WorkPageDataCreate"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             
+             mc:Ignorable="d"
+             d:DesignHeight="850"
+             d:DesignWidth="1200"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignPaper}"
+             FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="55*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="45*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                       
+                        Orientation="Horizontal"
+                        Margin="0,0,0,12">
+                <materialDesign:PackIcon Kind="FileDocumentEditOutline"
+                                         Width="28"
+                                         Height="28"
+                                         Foreground="{DynamicResource MaterialDesignBody}"
+                                         Margin="0,0,8,0"
+                                         VerticalAlignment="Center" />
+                <TextBlock Text="建立新工單"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <materialDesign:Card Grid.Row="1"
+                                 Margin="0,0,0,16"
+                                 Padding="16"
+                                 materialDesign:ElevationAssist.Elevation="Dp1"
+                                 UniformCornerRadius="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0"
+                          Grid.Column="0"
+                          Margin="0,4,16,4"
+                          VerticalAlignment="Bottom">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                 FontSize="18"
+                                 Padding="0,6,0,1"
+                                 VerticalAlignment="Bottom"
+                                 Text="{Binding LotNo, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="工單號 (Lot No) (必填)"
+                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Margin="16,0,0,4"
+                                    VerticalAlignment="Bottom"
+                                    ToolTip="存檔成功後，自動將批號尾數加 1 (例：0088 -> 0089)">
+
+                            <TextBlock Text="自動 +1"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource MaterialDesignBody}" />
+
+                            <ToggleButton IsChecked="{Binding IsAutoIncrementLotNo}"
+                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                          VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                    <!--<TextBox Grid.Row="0"
+                             Grid.Column="2"
+                             Text="{Binding ProductName}"
+                             materialDesign:HintAssist.Hint="產品名稱 (必填)"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />-->
+                    <ComboBox Grid.Row="0"
+                              Grid.Column="2"
+                              IsEditable="True"
+                              Text="{Binding ProductName}"
+                              Margin="0,4,16,4"
+                              VerticalAlignment="Bottom"
+                              ItemsSource="{Binding ProductNameList}"
+                              materialDesign:HintAssist.Hint="產品名稱 (必填)"
+                              FontSize="18"
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
+                    <TextBox Grid.Row="2"
+                             Grid.Column="0"
+                             FontSize="18"
+                             Margin="0,4,16,4"
+                             Padding="0,6,0,1"
+                             VerticalAlignment="Bottom"
+                             Text="{Binding LotNoParent}"
+                             materialDesign:HintAssist.Hint="柱號 (Parent Lot No)"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                    <TextBox Grid.Row="2"
+                             Grid.Column="2"
+                             FontSize="18"
+                             Margin="0,4,16,4"
+                             Padding="0,6,0,1"
+                             VerticalAlignment="Bottom"
+                             Text="{Binding Quantity}"
+                             materialDesign:HintAssist.Hint="數量 (Quantity)"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                </Grid>
+            </materialDesign:Card>
+
+            <materialDesign:Card Grid.Row="2"
+                                 materialDesign:ElevationAssist.Elevation="Dp1"
+                                 UniformCornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0"
+                                Orientation="Horizontal"
+                                Margin="12">
+                        <Button Command="{Binding LoadRecipeCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FolderOpenOutline"
+                                                         Margin="0,0,6,0"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="讀配方"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding SaveRecipeCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Margin="0,0,16,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentSaveOutline"
+                                                         Margin="0,0,6,0"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="存配方"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding AddStationCommand}"
+                                Style="{StaticResource MaterialDesignFlatDarkBgButton}"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus"
+                                                         Margin="0,0,4,0"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="新增"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding InsertStationCommand}"
+                                Style="{StaticResource MaterialDesignFlatDarkBgButton}"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PlaylistPlus"
+                                                         Margin="0,0,4,0"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="插入"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding CurrentRecipe}"
+                              SelectedItem="{Binding SelectedStation}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              FontSize="16"
+                              RowHeight="48"
+                              Background="{DynamicResource MaterialDesignPaper}"
+                              RowBackground="{DynamicResource MaterialDesignPaper}"
+                              AlternatingRowBackground="{DynamicResource MaterialDesignDataGridRowHoverBackground}"
+                              BorderThickness="0,1,0,0"
+                              BorderBrush="{DynamicResource MaterialDesignDivider}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="NO"
+                                                Binding="{Binding No}"
+                                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock"
+                                           BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                                        <Setter Property="FontWeight"
+                                                Value="SemiBold" />
+                                        <Setter Property="VerticalAlignment"
+                                                Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridCheckBoxColumn Header="Pass"
+                                                    Binding="{Binding Can_Pass, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <DataGridTemplateColumn Header="工程站別"
+                                                    Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.WorkStationList, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  SelectedValuePath="Definition"
+                                                  SelectedValue="{Binding Work_station, UpdateSourceTrigger=PropertyChanged}"
+                                                  materialDesign:HintAssist.Hint="選擇站點"
+                                                  FontSize="16"
+                                                  FontWeight="Bold"
+                                                  Margin="0,0,16,0">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding BarCode}"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                                        <TextBlock Text=" - "
+                                                                   Opacity="0.5" />
+                                                        <TextBlock Text="{Binding Definition}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="操作"
+                                                    Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.DeleteStationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                                Padding="4,0"
+                                                Height="32"
+                                                ToolTip="移除此站點"
+                                                VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="TrashCanOutline"
+                                                                     Width="20"
+                                                                     Height="20" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </materialDesign:Card>
+
+            <StackPanel Grid.Row="3"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,16,0,0">
+
+                <Button Command="{Binding ClearFormCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Height="44"
+                        Padding="24,0"
+                        Margin="0,0,16,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="DeleteSweepOutline"
+                                                 Width="20"
+                                                 Height="20"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0" />
+                        <TextBlock Text="清空資料"
+                                   VerticalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding SaveToDatabaseCommand}"
+                        Style="{StaticResource MaterialDesignFlatDarkBgButton}"
+                        Height="44"
+                        Padding="32,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="DatabaseArrowUpOutline"
+                                                 Width="22"
+                                                 Height="22"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0" />
+                        <TextBlock Text="儲存至資料庫"
+                                   VerticalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Left">
+                    <materialDesign:PackIcon Kind="History"
+                                             Width="28"
+                                             Height="28"
+                                             Foreground="{DynamicResource MaterialDesignBody}"
+                                             Margin="0,0,8,0"
+                                             VerticalAlignment="Center" />
+                    <TextBlock Text="最新建檔紀錄 (Top 50)"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Command="{Binding LoadLatestRecordsCommand}"
+                        Style="{StaticResource MaterialDesignIconForegroundButton}"
+                        ToolTip="重新整理"
+                        HorizontalAlignment="Right">
+                    <materialDesign:PackIcon Kind="Refresh"
+                                             Width="24"
+                                             Height="24" />
+                </Button>
+            </Grid>
+
+            <materialDesign:Card Grid.Row="1"
+                                 materialDesign:ElevationAssist.Elevation="Dp1"
+                                 UniformCornerRadius="8">
+                <DataGrid ItemsSource="{Binding LatestRecords}"
+                          AutoGenerateColumns="False"
+                          FontSize="16"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          RowHeight="40"
+                          Background="{DynamicResource MaterialDesignPaper}"
+                          RowBackground="{DynamicResource MaterialDesignPaper}"
+                          AlternatingRowBackground="{DynamicResource MaterialDesignDataGridRowHoverBackground}"
+                          materialDesign:DataGridAssist.CellPadding="12,4"
+                          BorderThickness="0">
+
+                    <DataGrid.Resources>
+                        <Style x:Key="DeletedStrikethroughStyle"
+                               TargetType="TextBlock"
+                               BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                            <Setter Property="VerticalAlignment"
+                                    Value="Center" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding BDelete}"
+                                             Value="1">
+                                    <Setter Property="TextDecorations"
+                                            Value="Strikethrough" />
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource MaterialDesignValidationErrorBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow"
+                               BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding BDelete}"
+                                             Value="1">
+                                    <Setter Property="Background"
+                                            Value="#1AEF5350" />
+                                    <Setter Property="TextElement.Foreground"
+                                            Value="{DynamicResource MaterialDesignValidationErrorBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="建立時間"
+                                            Binding="{Binding CTime, StringFormat=\{0:MM-dd HH:mm\}}"
+                                            ElementStyle="{StaticResource DeletedStrikethroughStyle}" />
+
+                        <DataGridTextColumn Header="Lot No"
+                                            Binding="{Binding LotNo}"
+                                            ElementStyle="{StaticResource DeletedStrikethroughStyle}" />
+
+                        <DataGridTextColumn Header="柱號"
+                                            Binding="{Binding LotNoParent}"
+                                            ElementStyle="{StaticResource DeletedStrikethroughStyle}" />
+
+                        <DataGridTextColumn Header="Product"
+                                            Binding="{Binding ProductName}"
+                                            ElementStyle="{StaticResource DeletedStrikethroughStyle}" />
+
+                        <DataGridTemplateColumn Header="操作"
+                                                Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.DeleteRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                            Padding="4,0"
+                                            Height="28"
+                                            ToolTip="刪除此紀錄"
+                                            VerticalAlignment="Center">
+                                        <Button.Style>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                                <Setter Property="IsEnabled"
+                                                        Value="True" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding BDelete}"
+                                                                 Value="1">
+                                                        <Setter Property="IsEnabled"
+                                                                Value="False" />
+                                                        <Setter Property="Opacity"
+                                                                Value="0.3" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <materialDesign:PackIcon Kind="TrashCanOutline"
+                                                                 Width="20"
+                                                                 Height="20" />
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="明細"
+                                                Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button 
+                                            ToolTip="查看工序歷程與明細"
+                                            Height="30"
+                                            Padding="8,0"
+                                            Command="{Binding DataContext.ShowDetailCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            VerticalAlignment="Center">
+                                        <Button.Style>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                                <Setter Property="IsEnabled"
+                                                        Value="True" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding BDelete}"
+                                                                 Value="1">
+                                                        <Setter Property="IsEnabled"
+                                                                Value="False" />
+                                                        <Setter Property="Opacity"
+                                                                Value="0.3" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <materialDesign:PackIcon Kind="FormatListText"
+                                                                 Width="18"
+                                                                 Height="18" />
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </materialDesign:Card>
+        </Grid>
+
+    </Grid>
+</UserControl>

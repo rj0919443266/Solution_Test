@@ -8,10 +8,17 @@
     <UseWPF>true</UseWPF>
 	<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	<Copyright>RJ0919443266</Copyright>
-	<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
+	
+
+	<MyVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</MyVersion>
+
+	<Version>$(MyVersion)</Version>
+	<FileVersion>$(MyVersion)</FileVersion>
+	<AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.9.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="MahApps.Metro" Version="2.4.11" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />

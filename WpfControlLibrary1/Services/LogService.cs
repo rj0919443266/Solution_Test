@@ -18,7 +18,7 @@ namespace WpfControlLibrary1.Services
 
     public interface ILogService
     {
-        void Log(string message, LogLevel level = LogLevel.Information);
+        void  Log(string message, LogLevel level = LogLevel.Information);
         void LogError(string message, Exception ex = null);
     }
 

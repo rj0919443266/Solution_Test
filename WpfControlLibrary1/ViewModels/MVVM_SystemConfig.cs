@@ -47,7 +47,7 @@ namespace WpfControlLibrary1.ViewModels
             _config = config;
             _snackbarService = snackbarService;
             // 載入當前系統運作中的設定值
-            PhpServerUrl = _config.PhpServerUrl;
+            PhpServerUrl = _config.ServerUrl;
             BarcodeComPort = _config.BarcodeComPort;
 
             IsPrioritySortingEnabled = _config.IsPrioritySortingEnabled;
@@ -126,7 +126,7 @@ namespace WpfControlLibrary1.ViewModels
         {
             try
             {
-                _config.PhpServerUrl = PhpServerUrl;
+                _config.ServerUrl = PhpServerUrl;
                 _config.BarcodeComPort = BarcodeComPort;
 
                 // 3. 儲存時同步開關狀態回系統實體設定

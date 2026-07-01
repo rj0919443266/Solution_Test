@@ -38,9 +38,14 @@ namespace WpfApp1.ViewModels
         private readonly ApiService _apiService;
         private readonly BarcodeScannerService _scannerService; //掃描槍服務
         //===========================================================
-       
-     
-         public ISnackbarMessageQueue MainSnackbarMessageQueue { get; }
+        [ObservableProperty]
+        private LoginResponseModel _currentUserInfo;// 全域儲存目前登入成功的使用者資訊
+        
+        [ObservableProperty]
+        private object _currentViewModel; //  當前主畫面上顯示的子 ViewModel (綁定到主畫面的 ContentControl)
+        //===========================================================
+
+        public ISnackbarMessageQueue MainSnackbarMessageQueue { get; }
         [ObservableProperty]
         private SnackbarMessageType _currentSnackbarType = SnackbarMessageType.Information;
         //===========================================================主畫面
@@ -306,7 +311,8 @@ namespace WpfApp1.ViewModels
                 if (_stateStartTime.HasValue)
                 {
                     TimeSpan duration = DateTime.Now - _stateStartTime.Value;
-                    StateDurationString = $"{duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}";
+                    int totalHours = (int)duration.TotalHours;
+                    StateDurationString = $"{totalHours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}";
                 }
             };
             _uiTimer.Start(); 
@@ -347,7 +353,7 @@ namespace WpfApp1.ViewModels
             // 如果狀態發生改變，就重新開始計算「狀態持續時間」
             if (ServerState != newState)
             {
-                // 🌟 核心關鍵：在重置時間起點之前，先把「上一個狀態維持的總時長」拿出來備用！
+                // 在重置時間起點之前，先把「上一個狀態維持的總時長」拿出來備用！
                 // (例如：如果是從斷線恢復，這串文字就會是 "00:05:23"，代表總共斷線了五分多鐘)
                 string lastDuration = string.IsNullOrEmpty(StateDurationString) ? "00:00:00" : StateDurationString;
 
@@ -358,7 +364,7 @@ namespace WpfApp1.ViewModels
                 if (newState == PhpServerState.Offline)
                 {
                     // 變成斷線狀態 (黃色警告)
-                    _logService.Log($"PHP 伺服器心跳檢測失敗，已中斷連線！(前次穩定連線時長: {lastDuration}，目標網址: {_config.PhpServerUrl})", LogLevel.Warning);
+                    _logService.Log($"PHP 伺服器心跳檢測失敗，已中斷連線！(前次穩定連線時長: {lastDuration}，目標網址: {_config.ServerUrl})", LogLevel.Warning);
                 }
                 else if (newState == PhpServerState.Online && ServerState == PhpServerState.Offline)
                 {
@@ -368,7 +374,7 @@ namespace WpfApp1.ViewModels
                 else if (newState == PhpServerState.Online && ServerState == PhpServerState.Testing)
                 {
                     // 程式剛開啟時的初次連線成功 (成功資訊)
-                    _logService.Log($"PHP 伺服器初次連線成功。(連線準備耗時: {lastDuration}，目標網址: {_config.PhpServerUrl})", LogLevel.Success);
+                    _logService.Log($"PHP 伺服器初次連線成功。(連線準備耗時: {lastDuration}，目標網址: {_config.ServerUrl})", LogLevel.Success);
                 }
             }
 
@@ -418,10 +424,10 @@ namespace WpfApp1.ViewModels
                 TargetViewModelType = null,
                 SubItems =
                 {
-                    new NavigationItem { Title = "工單建立", Icon = PackIconKind.FileDocumentPlusOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    new NavigationItem { Title = "工單建立", Icon = PackIconKind.FileDocumentPlusOutline, RequiredLevel = 0, TargetViewModelType = typeof(VM_WorkPageDataCreate) },
                     new NavigationItem { Title = "參數設定", Icon = PackIconKind.CogBox, RequiredLevel = 0, TargetViewModelType = typeof(VM_System_SetDetail) },
                     new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 3, TargetViewModelType = typeof(VM_UserControl_temp) },
-                     new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
+                    new NavigationItem { Title = "進階設定", Icon = PackIconKind.HammerWrench, RequiredLevel = 0, TargetViewModelType = typeof(VM_UserControl_temp) },
                     //  new NavigationItem
                     //{
                     //    Title = "系統設定XXXX",
@@ -502,7 +508,24 @@ namespace WpfApp1.ViewModels
 
         }
 
-        
+
+        /// <summary>
+        /// 處理導覽切換的核心邏輯
+        /// </summary>
+        /// <param name="targetType"></param>
+        //[RelayCommand]
+        //public void Navigate(Type targetType)
+        //{
+        //    if (targetType != null)
+        //    {
+        //        // 請 DI 容器幫我們生出對應的 ViewModel，並塞給 CurrentView
+        //        CurrentView = _serviceProvider.GetService(targetType);
+
+        //        //  切換畫面後，自動把側邊抽屜收起來 (UX 體驗優化)
+        //        IsMenuOpen = false;
+        //    }
+        //}
+
         /// <summary>
         /// 處理導覽切換的核心邏輯
         /// </summary>
@@ -512,10 +535,20 @@ namespace WpfApp1.ViewModels
         {
             if (targetType != null)
             {
-                // 請 DI 容器幫我們生出對應的 ViewModel，並塞給 CurrentView
-                CurrentView = _serviceProvider.GetService(targetType);
+                // 請 DI 容器幫我們生出對應的 ViewModel
+                var targetVM = _serviceProvider.GetService(targetType);
 
-                // 🌟 切換畫面後，自動把側邊抽屜收起來 (UX 體驗優化)
+                //【派發邏輯】：檢查目標 ViewModel 是否有實作 IUserLevelReceiver
+                if (targetVM is IUserLevelReceiver receiver)
+                {
+                    // 將主畫面持有的最新使用者資訊與權限等級派發進去
+                    receiver.ReceiveUserLevel(CurrentUserInfo);
+                }
+
+                // 將有權限資料的 VM 塞給 CurrentView 以更新畫面
+                CurrentView = targetVM;
+
+                //切換畫面後，自動把側邊抽屜收起來 (UX 體驗優化)
                 IsMenuOpen = false;
             }
         }
@@ -523,6 +556,63 @@ namespace WpfApp1.ViewModels
         #endregion
 
         #region "登入登出邏輯"
+
+        //[RelayCommand]
+        //private async Task ToggleLoginState()
+        //{
+        //    // 【情境 A：使用者目前已登入，想要登出】
+        //    if (IsLoggedIn)
+        //    {
+        //        // 1. 彈出確認視窗 (防呆)
+        //        var confirmResult = await MaterialMessageBox.ShowAsync("確定要登出系統嗎？", "登出確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        //        if (confirmResult == MessageBoxResult.Yes)
+        //        {
+        //            // 2. 清除登入者的資料
+        //            User_Name = "NA";
+        //            User_ID = "NA";
+        //            //PhpConnectionStatus = "未連線";
+
+        //            // 3. 切換按鈕狀態與文字
+        //            IsLoggedIn = false;
+        //            LoginButtonText = "系統登入";
+        //            LoginButtonIcon = PackIconKind.Login;
+
+        //            // 將權限降回 0 (訪客)，選單會自動把機台控制等高權限功能藏起來！
+        //            GenerateMenu(0);
+
+        //            // 安全防護：強制把畫面切換回首頁 (避免使用者登出後還停留在機台參數設定畫面)
+        //            //Navigate(typeof(UserControl1ViewModel));
+        //            Navigate(typeof(VM_WorkPageDataEdit));
+        //        }
+        //    }
+        //    // 【情境 B：使用者未登入，想要登入】
+        //    else
+        //    {
+        //        // 1. 透過 DI 產生登入卡片並彈出
+        //        var loginVM = _serviceProvider.GetService(typeof(VM_Login));
+        //        var result = await DialogHost.Show(loginVM, "RootDialog");
+
+        //        // 2. 判斷是否登入成功
+        //        if (result is LoginResponseModel loginData)
+        //        {
+        //            // 更新使用者資訊
+        //            User_ID = loginData.User_ID;
+        //            User_Name = loginData.UserName;
+        //            //PhpConnectionStatus = "已連線 (已登入)";
+
+        //            // 3. 切換按鈕狀態與文字
+        //            IsLoggedIn = true;
+        //            LoginButtonText = "登出";
+        //            LoginButtonIcon = PackIconKind.Logout;
+
+        //            // 4. 重新依據權限生成菜單
+        //            GenerateMenu(loginData.Level);
+
+        //            //MessageBox.Show($"登入成功！\n歡迎回來，{loginData.UserName}", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+        //        }
+        //    }
+        //}
+
 
         [RelayCommand]
         private async Task ToggleLoginState()
@@ -537,7 +627,9 @@ namespace WpfApp1.ViewModels
                     // 2. 清除登入者的資料
                     User_Name = "NA";
                     User_ID = "NA";
-                    //PhpConnectionStatus = "未連線";
+
+                    // 🌟 【新增】：清空全域完整登入資訊
+                    CurrentUserInfo = null;
 
                     // 3. 切換按鈕狀態與文字
                     IsLoggedIn = false;
@@ -548,7 +640,7 @@ namespace WpfApp1.ViewModels
                     GenerateMenu(0);
 
                     // 安全防護：強制把畫面切換回首頁 (避免使用者登出後還停留在機台參數設定畫面)
-                    //Navigate(typeof(UserControl1ViewModel));
+                    // 💡 備註：呼叫這裡的 Navigate 也會觸發上面寫好的派發邏輯 (將 null 傳給首頁)
                     Navigate(typeof(VM_WorkPageDataEdit));
                 }
             }
@@ -562,10 +654,12 @@ namespace WpfApp1.ViewModels
                 // 2. 判斷是否登入成功
                 if (result is LoginResponseModel loginData)
                 {
-                    // 更新使用者資訊
+                    // 將登入物件完整存入全域屬性，留給日後 Navigate 使用
+                    CurrentUserInfo = loginData;
+
+                    // 更新使用者資訊文字
                     User_ID = loginData.User_ID;
                     User_Name = loginData.UserName;
-                    //PhpConnectionStatus = "已連線 (已登入)";
 
                     // 3. 切換按鈕狀態與文字
                     IsLoggedIn = true;
@@ -575,7 +669,11 @@ namespace WpfApp1.ViewModels
                     // 4. 重新依據權限生成菜單
                     GenerateMenu(loginData.Level);
 
-                    //MessageBox.Show($"登入成功！\n歡迎回來，{loginData.UserName}", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // 【新增派發邏輯】：如果當前開著的畫面需要知道權限，登入成功瞬間直接更新它！
+                    if (CurrentView is IUserLevelReceiver receiver)
+                    {
+                        receiver.ReceiveUserLevel(CurrentUserInfo);
+                    }
                 }
             }
         }

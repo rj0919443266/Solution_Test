@@ -20,7 +20,7 @@ namespace WpfControlLibrary1
     public class SystemConfig
     {
         // PHP 伺服器的位址 (預設值)
-        public string PhpServerUrl { get; set; } = "http://192.168.1.100/api/";
+        public string ServerUrl { get; set; } = "127.0.0.1";
 
         // 預設的條碼槍 COM Port (預設值)
         public string BarcodeComPort { get; set; } = "COM3";

@@ -158,6 +158,10 @@
         <DataTemplate DataType="{x:Type viewmodels_lib:VM_WorkPageDataEdit}">
             <views:UserControl_WorkPageDataEdit />
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewmodels_lib:VM_WorkPageDataCreate}">
+            <views:UserControl_WorkPageDataCreate />
+        </DataTemplate>
         
         <DataTemplate DataType="{x:Type viewmodels_lib:VM_FIR}">
             <views:UserControl_FIR />
